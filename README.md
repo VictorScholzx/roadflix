@@ -5,7 +5,7 @@
 [![Platform](https://img.shields.io/badge/platform-Android%20Auto-3ddc84)](https://developer.android.com/training/cars)
 [![Min SDK](https://img.shields.io/badge/minSdk-26-blue)](https://apilevels.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.x-7f52ff)](https://kotlinlang.org/)
-[![Version](https://img.shields.io/badge/version-0.6-orange)](#distribution)
+[![Version](https://img.shields.io/badge/version-0.9-orange)](#distribution)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 🇮🇹 [Leggi in italiano](README.it.md)
