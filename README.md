@@ -1,3 +1,29 @@
+# RoadFlix
+
+<img src="docs/roadflix/icone/roadflix_arredondado_1024.png" alt="Ícone do RoadFlix" width="120">
+
+**Espelhamento de tela, navegador e YouTube na central do carro, via Android Auto.**
+
+RoadFlix é uma adaptação pessoal do **[AA Suite](https://github.com/iAlias/AASuite)**, de
+iAlias, distribuído sob a [licença MIT](LICENSE). O código original e o histórico de commits do
+autor foram mantidos; as mudanças do RoadFlix vêm por cima deles.
+
+- Testado num **Geely EX2 Pro** (central original, Android Auto por USB) com um Redmi Note 8
+  (Android 10).
+- Mudanças até agora: nome **RoadFlix**, ícone próprio e um ID de app separado
+  (`com.viami.aamirror.roadflix` no build de debug), que instala ao lado do AA Suite original.
+- Planejado: interface em português no estilo iOS/CarPlay escuro, seletor de temas, página
+  inicial do navegador com favoritos e ícones automáticos, histórico e abas.
+- Escopo, decisões e testes: [docs/roadflix](docs/roadflix).
+
+> [!IMPORTANT]
+> **Uso pessoal.** Use só com o carro parado ou por passageiros. Como explica o README original
+> abaixo, apps de template do Android Auto só aparecem em carros reais quando vêm da Play Store.
+
+O README original do AA Suite segue abaixo, sem alterações.
+
+---
+
 # AA Suite
 
 **Screen mirroring, a web browser and YouTube's TV interface on your car's Android Auto display.**

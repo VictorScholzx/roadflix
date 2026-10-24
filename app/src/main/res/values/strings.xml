@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AA Suite</string>
+    <string name="app_name">RoadFlix</string>
 
     <!-- Notifiche -->
     <string name="notification_channel">Mirroring attivo</string>

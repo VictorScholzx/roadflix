@@ -36,6 +36,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Installs next to the original AA Suite build so the two can be compared.
+            applicationIdSuffix = ".roadflix"
+        }
         release {
             isMinifyEnabled = false
             signingConfig = signingConfigs.findByName("release")
