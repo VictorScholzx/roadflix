@@ -440,7 +440,8 @@ Prioridades identificadas pela auditoria: abas, histórico, botão avançar, tem
 - O RoadFlix precisa das próprias permissões e de ser ativado em "Personalizar acesso rápido" do Android Auto. Usar um app de cada vez: os dois abrem o servidor de links (AA Share) na mesma porta 8977.
 
 **Ordem de implementação proposta:**
-1. Tela do celular nova (português, visual aprovado) **com o seletor de temas**.
+1. ✅ **Concluída em 24/10/2026:** tela do celular nova (português, visual aprovado) **com o seletor de temas**. Seis temas + Automático (por enquanto segue o modo claro/escuro do celular; no carro vai seguir o dia/noite da central). Permissões com status "Ativo"/"Ativar", envio de link, favoritos e passo a passo do Android Auto. Notificação e tela de favoritos em português. Barras do sistema seguem o tema. Lógica dos temas coberta por testes (`AppThemeTest`, 70 testes no total, 0 falhas). Testada pelo usuário no Redmi Note 8.
+   - Detalhe conhecido: logo após reinstalar, "Toque pela central" pode mostrar "Ativar" por alguns segundos, até o Android religar o serviço de acessibilidade.
 2. Página inicial local do navegador (relógio, pesquisa, favoritos) seguindo o tema; botões da lateral trocados para menu, voltar, avançar e início.
 3. Textos e ícones dos menus do carro em português.
 4. Histórico (Recentes) e destaque do link enviado pelo celular.
@@ -502,6 +503,8 @@ Registros de ideias do usuário que **não** fazem parte do escopo atual. Só en
 ---
 
 ## Histórico de decisões
+
+- **24/10/2026:** projeto publicado no GitHub do usuário como repositório **público e independente** (não é fork): https://github.com/VictorScholzx/roadflix (branch `main`). Mantém o histórico e a licença MIT do AA Suite, com créditos a iAlias no README. Commits com o e-mail noreply do GitHub. Remotos locais: `origin` = roadflix e `upstream` = iAlias/AASuite. O escopo publicado fica em `docs/roadflix/escopo.md` (sem o número de série do celular).
 
 - **24/10/2026:** como o caminho B funcionou, o caminho A deixou de ser necessário. A issue https://github.com/iAlias/AASuite/issues/2 foi **fechada sem comentário**, a pedido do usuário.
 

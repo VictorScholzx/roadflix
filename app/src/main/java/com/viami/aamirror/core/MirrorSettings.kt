@@ -9,4 +9,12 @@ object MirrorSettings {
     /** How the car home screen lists the modes. */
     @Volatile
     var menuLayout: MenuLayout = MenuLayout.GRID
+
+    /** The theme picked on the phone. */
+    @Volatile
+    var theme: AppTheme = AppTheme.DEFAULT
+
+    /** true = light by day, [theme] by night. */
+    @Volatile
+    var autoTheme: Boolean = false
 }

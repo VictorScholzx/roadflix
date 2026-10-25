@@ -1,96 +1,287 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Colours, corners and the theme swatches are applied in SetupActivity from the chosen theme. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
+    android:fillViewport="true"
     android:fitsSystemWindows="true">
 
-    <TextView
-        android:id="@+id/txt_status"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:text="@string/status_idle" />
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="28dp">
 
-    <Button
-        android:id="@+id/btn_capture"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/btn_capture" />
+        <TextView
+            android:id="@+id/txt_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="-0.02"
+            android:text="@string/app_name"
+            android:textSize="32sp" />
 
-    <TextView
-        android:id="@+id/txt_accessibility"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/accessibility_off" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="4dp">
 
-    <Button
-        android:id="@+id/btn_accessibility"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_accessibility" />
+            <View
+                android:id="@+id/dot_status"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="8dp" />
 
-    <TextView
-        android:id="@+id/txt_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/overlay_off" />
+            <TextView
+                android:id="@+id/txt_status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/status_idle"
+                android:textSize="15sp" />
+        </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_overlay" />
+        <!-- Tema -->
+        <TextView
+            android:id="@+id/lbl_theme"
+            style="@style/SetupSection"
+            android:text="@string/section_theme" />
 
-    <TextView
-        android:id="@+id/txt_brightness"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/brightness_off" />
+        <LinearLayout
+            android:id="@+id/card_theme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingTop="16dp">
 
-    <Button
-        android:id="@+id/btn_brightness"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_brightness" />
+            <LinearLayout
+                android:id="@+id/row_swatches"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingEnd="16dp" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/browser_section" />
+            <TextView
+                android:id="@+id/txt_theme_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="14dp"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="15sp" />
 
-    <EditText
-        android:id="@+id/edit_url"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/search_hint"
-        android:imeOptions="actionGo"
-        android:inputType="textUri"
-        android:singleLine="true" />
+            <View
+                android:id="@+id/rule_theme"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
 
-    <Button
-        android:id="@+id/btn_open_url"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_open_in_car" />
+            <LinearLayout
+                android:id="@+id/row_auto"
+                style="@style/SetupRow">
 
-    <Button
-        android:id="@+id/btn_bookmarks"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_bookmarks" />
+                <LinearLayout style="@style/SetupRowText">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:textSize="14sp"
-        android:text="@string/setup_instructions" />
+                    <TextView
+                        android:id="@+id/txt_auto"
+                        style="@style/SetupRowTitle"
+                        android:text="@string/theme_auto" />
 
-</LinearLayout>
+                    <TextView
+                        android:id="@+id/txt_auto_sub"
+                        style="@style/SetupRowSub"
+                        android:text="@string/theme_auto_sub" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/switch_auto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Permissões -->
+        <TextView
+            android:id="@+id/lbl_permissions"
+            style="@style/SetupSection"
+            android:text="@string/section_permissions" />
+
+        <LinearLayout
+            android:id="@+id/card_permissions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp">
+
+            <LinearLayout
+                android:id="@+id/row_touch"
+                style="@style/SetupRow">
+
+                <LinearLayout style="@style/SetupRowText">
+
+                    <TextView style="@style/SetupRowTitle" android:text="@string/perm_touch" />
+
+                    <TextView style="@style/SetupRowSub" android:text="@string/perm_touch_sub" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txt_touch"
+                    style="@style/SetupRowValue" />
+            </LinearLayout>
+
+            <View android:id="@+id/rule_1" style="@style/SetupRule" />
+
+            <LinearLayout
+                android:id="@+id/row_rotation"
+                style="@style/SetupRow">
+
+                <LinearLayout style="@style/SetupRowText">
+
+                    <TextView style="@style/SetupRowTitle" android:text="@string/perm_rotation" />
+
+                    <TextView style="@style/SetupRowSub" android:text="@string/perm_rotation_sub" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txt_rotation"
+                    style="@style/SetupRowValue" />
+            </LinearLayout>
+
+            <View android:id="@+id/rule_2" style="@style/SetupRule" />
+
+            <LinearLayout
+                android:id="@+id/row_dim"
+                style="@style/SetupRow">
+
+                <LinearLayout style="@style/SetupRowText">
+
+                    <TextView style="@style/SetupRowTitle" android:text="@string/perm_dim" />
+
+                    <TextView style="@style/SetupRowSub" android:text="@string/perm_dim_sub" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txt_dim"
+                    style="@style/SetupRowValue" />
+            </LinearLayout>
+
+            <View android:id="@+id/rule_3" style="@style/SetupRule" />
+
+            <LinearLayout
+                android:id="@+id/row_capture"
+                style="@style/SetupRow">
+
+                <LinearLayout style="@style/SetupRowText">
+
+                    <TextView style="@style/SetupRowTitle" android:text="@string/perm_capture" />
+
+                    <TextView style="@style/SetupRowSub" android:text="@string/perm_capture_sub" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txt_capture"
+                    style="@style/SetupRowValue"
+                    android:text="@string/perm_capture_action" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Enviar para o carro -->
+        <TextView
+            android:id="@+id/lbl_send"
+            style="@style/SetupSection"
+            android:text="@string/section_send" />
+
+        <LinearLayout
+            android:id="@+id/card_send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/lbl_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:labelFor="@+id/edit_url"
+                android:text="@string/search_hint"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/edit_url"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:hint="g1.globo.com"
+                android:imeOptions="actionGo"
+                android:importantForAutofill="no"
+                android:inputType="textUri"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:singleLine="true"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btn_open_url"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-medium"
+                android:stateListAnimator="@null"
+                android:text="@string/btn_open_in_car"
+                android:textAllCaps="false"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/card_links"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:orientation="vertical"
+            android:paddingStart="16dp">
+
+            <LinearLayout
+                android:id="@+id/row_bookmarks"
+                style="@style/SetupRow">
+
+                <TextView
+                    style="@style/SetupRowTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/btn_bookmarks" />
+
+                <TextView
+                    android:id="@+id/txt_bookmarks"
+                    style="@style/SetupRowValue" />
+            </LinearLayout>
+
+            <View android:id="@+id/rule_4" style="@style/SetupRule" />
+
+            <LinearLayout
+                android:id="@+id/row_android_auto"
+                style="@style/SetupRow">
+
+                <TextView
+                    style="@style/SetupRowTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/row_android_auto" />
+
+                <TextView
+                    android:id="@+id/txt_android_auto"
+                    style="@style/SetupRowValue"
+                    android:text="›" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

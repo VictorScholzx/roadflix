@@ -2,13 +2,13 @@
 <resources>
     <string name="app_name">RoadFlix</string>
 
-    <!-- Notifiche -->
-    <string name="notification_channel">Mirroring attivo</string>
-    <string name="notification_mirroring">Mirroring dello schermo in corso</string>
-    <string name="notification_stop">Interrompi</string>
-    <string name="notification_channel_start">Richiesta di avvio</string>
-    <string name="start_request_title">AA Suite</string>
-    <string name="start_request_text">Tocca per autorizzare la condivisione dello schermo</string>
+    <!-- Notificações -->
+    <string name="notification_channel">Espelhamento ativo</string>
+    <string name="notification_mirroring">Espelhando a tela na central</string>
+    <string name="notification_stop">Parar</string>
+    <string name="notification_channel_start">Pedido de início</string>
+    <string name="start_request_title">RoadFlix</string>
+    <string name="start_request_text">Toque para autorizar o compartilhamento da tela</string>
 
     <!-- Menu display auto -->
     <string name="menu_mirror">Mirroring schermo</string>
@@ -40,37 +40,44 @@
     <string name="car_overlay_missing">Concedi "Mostra sopra altre app" nell\'app AA Suite sul telefono</string>
 
     <!-- Display auto: browser -->
-    <string name="search_hint">URL o ricerca Google</string>
+    <string name="search_hint">Endereço ou pesquisa</string>
     <string name="row_search">Cerca o apri URL…</string>
-    <string name="bookmarks_title">Preferiti browser</string>
-    <string name="btn_bookmarks">Gestisci preferiti</string>
-    <string name="btn_add_bookmark">Aggiungi preferito</string>
-    <string name="edit_bookmark">Modifica preferito</string>
-    <string name="bookmark_title_hint">Nome (es. YouTube)</string>
-    <string name="bookmark_url_hint">Indirizzo (es. www.youtube.com)</string>
-    <string name="save">Salva</string>
-    <string name="delete">Elimina</string>
-    <string name="cancel">Annulla</string>
+    <string name="bookmarks_title">Favoritos</string>
+    <string name="btn_bookmarks">Favoritos</string>
+    <string name="btn_add_bookmark">Adicionar favorito</string>
+    <string name="edit_bookmark">Editar favorito</string>
+    <string name="bookmark_title_hint">Nome (ex.: YouTube)</string>
+    <string name="bookmark_url_hint">Endereço (ex.: www.youtube.com)</string>
+    <string name="save">Salvar</string>
+    <string name="delete">Excluir</string>
+    <string name="cancel">Cancelar</string>
 
-    <!-- Activity di setup -->
-    <string name="status_idle">Non attivo. Autorizza la cattura schermo, poi apri AA Suite sull\'auto.</string>
-    <string name="status_waiting">In attesa della conferma…</string>
-    <string name="status_ready">Pronto: apri AA Suite sul display dell\'auto</string>
-    <string name="status_mirroring">Mirroring attivo sul display dell\'auto</string>
-    <string name="accessibility_on">Servizio Accessibility: attivo ✓</string>
-    <string name="accessibility_off">Servizio Accessibility: non attivo</string>
-    <string name="btn_accessibility">Apri impostazioni Accessibility</string>
-    <string name="overlay_on">Mostra sopra altre app: concesso ✓</string>
-    <string name="overlay_off">Mostra sopra altre app: non concesso (serve per il blocco orizzontale)</string>
-    <string name="btn_overlay">Concedi "Mostra sopra altre app"</string>
-    <string name="btn_capture">Autorizza cattura schermo</string>
-    <string name="brightness_on">Risparmio energetico: attivo ✓ (luminosità al minimo durante il mirroring)</string>
-    <string name="brightness_off">Risparmio energetico: non attivo (serve "Modifica impostazioni di sistema")</string>
-    <string name="btn_brightness">Attiva risparmio energetico</string>
-    <string name="accessibility_description">Consente ad AA Suite di inviare tocchi, Indietro e Home dal display dell\'auto</string>
-    <string name="browser_section">Browser: apri una pagina sul display dell\'auto</string>
-    <string name="btn_open_in_car">Apri nell\'auto</string>
-    <string name="opened_in_car">Aperto sul display dell\'auto</string>
-    <string name="car_not_connected">L\'auto non è collegata: apri AA Suite → Browser web dal launcher di Android Auto</string>
-    <string name="setup_instructions">Setup Android Auto (una tantum):\n1. App Android Auto → Impostazioni → tocca 10 volte "Versione" per attivare la modalità sviluppatore\n2. Menu ⋮ → Impostazioni sviluppatore → attiva "Fonti sconosciute"\n3. Impostazioni → Personalizza launcher → attiva AA Suite</string>
+    <!-- Tela do celular -->
+    <string name="status_idle">Pronto · conecte ao carro e abra o RoadFlix na central</string>
+    <string name="status_waiting">Aguardando a confirmação no celular…</string>
+    <string name="status_ready">Captura autorizada · abra o espelhamento na central</string>
+    <string name="status_mirroring">Espelhando a tela na central</string>
+    <string name="section_theme">Tema</string>
+    <string name="theme_auto">Automático</string>
+    <string name="theme_auto_sub">Claro de dia, o tema escolhido à noite</string>
+    <string name="section_permissions">Permissões</string>
+    <string name="perm_touch">Toque pela central</string>
+    <string name="perm_touch_sub">Serviço de acessibilidade</string>
+    <string name="perm_rotation">Trava na horizontal</string>
+    <string name="perm_rotation_sub">Exibir sobre outros apps</string>
+    <string name="perm_dim">Escurecer o celular</string>
+    <string name="perm_dim_sub">Ao espelhar · economiza bateria</string>
+    <string name="perm_capture">Captura de tela</string>
+    <string name="perm_capture_sub">O Android pede a cada espelhamento</string>
+    <string name="perm_on">Ativo</string>
+    <string name="perm_off">Ativar</string>
+    <string name="perm_capture_action">Autorizar</string>
+    <string name="section_send">Enviar para o carro</string>
+    <string name="btn_open_in_car">Abrir no carro</string>
+    <string name="opened_in_car">Aberto na central do carro</string>
+    <string name="car_not_connected">O carro não está conectado: abra o RoadFlix → Navegador na central</string>
+    <string name="row_android_auto">Ativar no Android Auto</string>
+    <string name="accessibility_description">Permite que o RoadFlix envie toques, Voltar e Início a partir da central do carro</string>
+    <string name="setup_instructions">Configuração única no Android Auto:\n\n1. App Android Auto → Configurações → toque 10 vezes em "Versão" para ativar o modo desenvolvedor.\n2. Menu ⋮ → Configurações do desenvolvedor → ative "Fontes desconhecidas".\n3. Configurações → Personalizar acesso rápido → marque o RoadFlix.</string>
+    <string name="ok">Ok</string>
 </resources>
