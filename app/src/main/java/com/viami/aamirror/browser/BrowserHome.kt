@@ -8,6 +8,7 @@ import com.viami.aamirror.core.History
 import com.viami.aamirror.core.HomePage
 import com.viami.aamirror.core.HomeTile
 import com.viami.aamirror.core.MirrorSettings
+import com.viami.aamirror.core.Palette
 import com.viami.aamirror.core.RecentLink
 import com.viami.aamirror.core.SentLink
 import com.viami.aamirror.core.UrlResolver
@@ -47,9 +48,12 @@ object BrowserHome {
                     icon = FaviconCache.dataUri(context, HomePage.hostOf(it.url)),
                 )
             }
-        val theme = AppTheme.resolve(MirrorSettings.theme, MirrorSettings.autoTheme, isNight(context))
-        return HomePage.render(theme.palette, tiles, recents, sent)
+        return HomePage.render(palette(context), tiles, recents, sent)
     }
+
+    /** The colours of the chosen theme as it applies right now (automatic mode follows day/night). */
+    fun palette(context: Context): Palette =
+        AppTheme.resolve(MirrorSettings.theme, MirrorSettings.autoTheme, isNight(context)).palette
 
     /** Hosts whose icons the start page shows: the favourites and the recent pages. */
     fun hosts(context: Context): List<String> =

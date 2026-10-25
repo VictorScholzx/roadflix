@@ -447,7 +447,9 @@ Prioridades identificadas pela auditoria: abas, histórico, botão avançar, tem
 4. ✅ **Concluída em 24/10/2026:** coluna "Recentes" na página inicial do carro (5 últimos sites, com horário "14:10" / "Ontem" / data), histórico guardado só no celular (até 50, sem duplicar), destaque "Enviado do celular há N min · Abrir" por 2 horas para links do botão "Abrir no carro" ou do AA Share, e "Limpar histórico" na tela do celular (com confirmação; favoritos ficam). 89 testes, 0 falhas. Testada pelo usuário no DHU.
    - Detalhe conhecido: voltar à página inicial pelo botão "voltar" pode mostrar os Recentes de antes; o botão "início" sempre mostra a lista atual.
    - Ajustes pedidos pelo usuário (24/10/2026): ícone do site em cada item dos Recentes (24 px; subdomínios como `m.youtube.com` usam o ícone do domínio principal); **lixeira** em cada item e no destaque "Enviado do celular" para remover individualmente; **filtro de anúncios**: redirecionamentos de redes de anúncio (páginas "Atenção!" em `…/click?key=…` e domínios como Adcash/PopAds) não são abertos nem salvos, e os já salvos somem da lista. 96 testes, 0 falhas. Testado pelo usuário no DHU.
-5. Abas.
+5. ✅ **Concluída em 24/10/2026:** abas no navegador do carro. Barra fixa no topo (cores do tema), uma pílula por aba com "Início" ou o título/site, até 5 abas (cada uma mantém sua página carregada; trocar não recarrega), "+" para nova aba na página inicial. A aba aberta mostra o "×" e também fecha ao ser tocada em qualquer ponto; abas de fundo só são mostradas ao toque; com uma aba só, não há "×" nem fechamento. Voltar/avançar/início/pesquisa agem na aba aberta. As abas sobrevivem a sair e voltar ao navegador, não a fechar o app. 104 testes, 0 falhas. Testada pelo usuário no DHU.
+
+**Fase 7 (personalização): etapas 1 a 5 concluídas em 24/10/2026.** Pendente: testar tudo na central do Geely.
 
 ---
 

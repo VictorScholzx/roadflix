@@ -3,27 +3,39 @@ package com.viami.aamirror.browser
 import android.annotation.SuppressLint
 import android.app.Presentation
 import android.content.Context
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.text.TextUtils
+import android.util.TypedValue
+import android.view.Gravity
 import android.util.Log
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.viami.aamirror.core.AdFilter
 import com.viami.aamirror.core.ArrowKey
 import com.viami.aamirror.core.GesturePoint
 import com.viami.aamirror.core.HomePage
 import com.viami.aamirror.core.KeyScroll
 import com.viami.aamirror.core.MirrorSettings
+import com.viami.aamirror.core.Palette
 import com.viami.aamirror.core.ScrollGesture
+import com.viami.aamirror.core.TabList
 import com.viami.aamirror.core.WebViewport
 import com.viami.aamirror.setup.HistoryStore
 import kotlinx.coroutines.MainScope
@@ -40,6 +52,7 @@ val BrowserDisplay: WebDisplay = WebDisplay(
     homePage = BrowserHome::html,
     onVisit = BrowserHome::recordVisit,
     blockAdRedirects = true,
+    tabPalette = BrowserHome::palette,
 )
 
 /**
@@ -69,6 +82,8 @@ class WebDisplay(
     private val homePage: ((Context) -> String)? = null,
     private val onVisit: ((Context, String, String) -> Unit)? = null,
     private val blockAdRedirects: Boolean = false,
+    /** Set for the browser: shows a tab bar painted with this palette. */
+    private val tabPalette: ((Context) -> Palette)? = null,
 ) {
 
     /** Called when the start page's search pill is tapped; the car screen opens its keyboard. */
@@ -80,10 +95,18 @@ class WebDisplay(
     private val mainHandler = Handler(Looper.getMainLooper())
     private var virtualDisplay: VirtualDisplay? = null
     private var presentation: Presentation? = null
-    private var webView: WebView? = null
 
-    /** Survives detach/attach cycles so the page comes back after focus loss. */
-    private var currentUrl: String = homeUrl
+    /** Survives detach/attach cycles so the tabs come back after focus loss. */
+    private var tabs: TabList = TabList.single(homeUrl)
+
+    /** One WebView per tab, in the same order as [tabs]; empty while detached. */
+    private val views = mutableListOf<WebView>()
+    private var container: FrameLayout? = null
+    private var tabBar: LinearLayout? = null
+    private var scalePercent = 100
+
+    private val webView: WebView?
+        get() = views.getOrNull(tabs.active)
 
     /** State of the drag the car scroll events are being folded into. */
     private var gestureActive = false
@@ -98,13 +121,12 @@ class WebDisplay(
     val isAttached: Boolean
         get() = presentation != null
 
-    @SuppressLint("SetJavaScriptEnabled")
     fun attach(context: Context, surface: Surface, width: Int, height: Int, densityDpi: Int) {
         mainHandler.post {
             detachNow()
             // The host paints the virtual display pixel for pixel, so its
             // resolution must match the surface: a bigger one only crops.
-            val scalePercent = logicalWidth
+            scalePercent = logicalWidth
                 ?.let { WebViewport.initialScalePercent(width, it) }
                 ?: 100
             Log.i(TAG, "attach surface=${width}x$height dpi=$densityDpi scale=$scalePercent%")
@@ -119,43 +141,29 @@ class WebDisplay(
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY,
             )
             val shown = Presentation(context, display.display)
-            val web = WebView(shown.context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.mediaPlaybackRequiresUserGesture = false
-                userAgent?.let { settings.userAgentString = it }
-                if (scalePercent != 100) {
-                    // Zoom out so the page lays itself out for a wide screen
-                    // while still being drawn on the small car surface.
-                    settings.useWideViewPort = true
-                    settings.loadWithOverviewMode = true
-                    setInitialScale(scalePercent)
-                }
-                webViewClient = object : WebViewClient() {
-                    /** Ad-network redirects ("Atenção!" pages) are dropped instead of opened. */
-                    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                        val blocked = blockAdRedirects && request.isForMainFrame &&
-                            AdFilter.isAdRedirect(request.url.toString())
-                        if (blocked) Log.i(TAG, "blocked ad redirect ${request.url.host}")
-                        return blocked
-                    }
-
-                    override fun onPageFinished(view: WebView, url: String) {
-                        currentUrl = url
-                        applyVideoFit(view)
-                        appContext?.let { onVisit?.invoke(it, url, view.title.orEmpty()) }
-                    }
-                }
-            }
-            if (homePage != null) web.addJavascriptInterface(Bridge(), HomePage.BRIDGE)
-            shown.setContentView(web)
-            shown.show()
             appContext = context
-            loadInto(web, currentUrl)
+            val pages = FrameLayout(shown.context)
+            container = pages
+            if (tabPalette != null) {
+                val root = LinearLayout(shown.context).apply { orientation = LinearLayout.VERTICAL }
+                val bar = LinearLayout(shown.context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                }
+                tabBar = bar
+                root.addView(bar, LinearLayout.LayoutParams(MATCH_PARENT, dp(shown.context, 60)))
+                root.addView(pages, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f))
+                shown.setContentView(root)
+            } else {
+                shown.setContentView(pages)
+            }
+            tabs.tabs.forEach { tab -> addView(shown.context, tab.url) }
+            showActive()
+            shown.show()
             if (homePage != null) fetchIcons(context)
             virtualDisplay = display
             presentation = shown
-            webView = web
+            renderTabBar()
         }
     }
 
@@ -166,16 +174,65 @@ class WebDisplay(
     private fun detachNow() {
         cancelGesture()
         presentation?.dismiss()
-        webView?.destroy()
+        views.forEach { it.destroy() }
+        views.clear()
         virtualDisplay?.release()
         presentation = null
-        webView = null
         virtualDisplay = null
+        container = null
+        tabBar = null
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun addView(context: Context, url: String): WebView {
+        val web = WebView(context).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            userAgent?.let { settings.userAgentString = it }
+            if (scalePercent != 100) {
+                // Zoom out so the page lays itself out for a wide screen
+                // while still being drawn on the small car surface.
+                settings.useWideViewPort = true
+                settings.loadWithOverviewMode = true
+                setInitialScale(scalePercent)
+            }
+            webViewClient = object : WebViewClient() {
+                /** Ad-network redirects ("Atenção!" pages) are dropped instead of opened. */
+                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                    val blocked = blockAdRedirects && request.isForMainFrame &&
+                        AdFilter.isAdRedirect(request.url.toString())
+                    if (blocked) Log.i(TAG, "blocked ad redirect ${request.url.host}")
+                    return blocked
+                }
+
+                override fun onPageFinished(view: WebView, url: String) {
+                    val index = views.indexOf(view)
+                    if (index >= 0) tabs = tabs.update(index, url, view.title.orEmpty())
+                    applyVideoFit(view)
+                    appContext?.let { onVisit?.invoke(it, url, view.title.orEmpty()) }
+                    renderTabBar()
+                }
+            }
+        }
+        if (homePage != null) web.addJavascriptInterface(Bridge(), HomePage.BRIDGE)
+        container?.addView(web, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        views.add(web)
+        loadInto(web, url)
+        return web
+    }
+
+    /** Only the showing tab is visible; the others keep their pages loaded behind it. */
+    private fun showActive() {
+        views.forEachIndexed { i, web -> web.visibility = if (i == tabs.active) View.VISIBLE else View.GONE }
     }
 
     fun loadUrl(url: String) {
-        currentUrl = url
-        mainHandler.post { webView?.let { loadInto(it, url) } }
+        mainHandler.post {
+            tabs = tabs.update(tabs.active, url, "")
+            webView?.let { loadInto(it, url) }
+            renderTabBar()
+        }
     }
 
     /** The start page is generated locally; everything else is a normal load. */
@@ -188,11 +245,52 @@ class WebDisplay(
         }
     }
 
-    /** Redraws the start page if it is showing, after a theme change or new icons. */
+    /** A new tab on the start page, shown at once. */
+    fun newTab() {
+        mainHandler.post {
+            val shown = presentation ?: return@post
+            if (!tabs.canOpen) return@post
+            finishGesture()
+            tabs = tabs.open(homeUrl)
+            addView(shown.context, homeUrl)
+            showActive()
+            renderTabBar()
+        }
+    }
+
+    fun selectTab(index: Int) {
+        mainHandler.post {
+            finishGesture()
+            tabs = tabs.select(index)
+            showActive()
+            renderTabBar()
+        }
+    }
+
+    fun closeTab(index: Int) {
+        mainHandler.post {
+            if (index !in views.indices) return@post
+            finishGesture()
+            val closingLast = tabs.size == 1
+            tabs = tabs.close(index, homeUrl)
+            if (closingLast) {
+                // The only tab is never removed, just sent back to the start page.
+                webView?.let { it.clearHistory(); loadInto(it, homeUrl) }
+            } else {
+                val web = views.removeAt(index)
+                container?.removeView(web)
+                web.destroy()
+                showActive()
+            }
+            renderTabBar()
+        }
+    }
+
+    /** Redraws the start page wherever it is showing, after a theme change or new icons. */
     fun refreshHome() {
         mainHandler.post {
-            val web = webView ?: return@post
-            if (HomePage.isHome(web.url)) loadInto(web, HomePage.URL)
+            views.forEach { if (HomePage.isHome(it.url)) loadInto(it, HomePage.URL) }
+            renderTabBar()
             // A favourite added on the phone gets its icon on the next refresh.
             appContext?.let { fetchIcons(it) }
         }
@@ -207,6 +305,70 @@ class WebDisplay(
     fun goForward() {
         mainHandler.post { webView?.let { if (it.canGoForward()) it.goForward() } }
     }
+
+    /** The chips across the top: one per tab (tap to show, × to close) and a + for a new one. */
+    private fun renderTabBar() {
+        val bar = tabBar ?: return
+        val context = appContext ?: return
+        val palette = tabPalette?.invoke(context) ?: return
+        val c = bar.context
+        bar.removeAllViews()
+        bar.setBackgroundColor(palette.ground)
+        // The car's action strip floats over the top right corner.
+        bar.setPadding(dp(c, 12), 0, dp(c, 104), 0)
+        for (i in 0 until tabs.size) {
+            val selected = i == tabs.active
+            val chip = LinearLayout(c).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                background = pill(if (selected) palette.button else palette.surface, dp(c, 22))
+                setPadding(dp(c, 16), 0, dp(c, if (selected && tabs.size > 1) 4 else 16), 0)
+                // Tapping the tab already showing closes it, as its × does; any other tab is shown.
+                setOnClickListener { if (selected && tabs.size > 1) closeTab(i) else selectTab(i) }
+            }
+            chip.addView(TextView(c).apply {
+                text = tabs.label(i)
+                setTextColor(if (selected) palette.buttonText else palette.muted)
+                textSize = 15f
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                maxLines = 1
+                ellipsize = TextUtils.TruncateAt.END
+                maxWidth = dp(c, 170)
+            })
+            if (selected && tabs.size > 1) {
+                chip.addView(TextView(c).apply {
+                    text = "×"
+                    textSize = 20f
+                    gravity = Gravity.CENTER
+                    setTextColor(if (selected) palette.buttonText else palette.muted)
+                    contentDescription = "Fechar aba"
+                    setOnClickListener { closeTab(i) }
+                }, LinearLayout.LayoutParams(dp(c, 40), dp(c, 44)))
+            }
+            bar.addView(chip, LinearLayout.LayoutParams(WRAP_CONTENT, dp(c, 44)).apply {
+                marginEnd = dp(c, 8)
+            })
+        }
+        bar.addView(TextView(c).apply {
+            text = "+"
+            textSize = 24f
+            gravity = Gravity.CENTER
+            setTextColor(if (tabs.canOpen) palette.text else palette.raised)
+            background = pill(palette.surface, dp(c, 22))
+            contentDescription = "Nova aba"
+            isEnabled = tabs.canOpen
+            setOnClickListener { newTab() }
+        }, LinearLayout.LayoutParams(dp(c, 44), dp(c, 44)))
+    }
+
+    private fun pill(color: Int, radius: Int) = GradientDrawable().apply {
+        setColor(color)
+        cornerRadius = radius.toFloat()
+    }
+
+    private fun dp(context: Context, value: Int): Int =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), context.resources.displayMetrics)
+            .toInt()
 
     /** What the start page's JavaScript can call; it only acts while the start page is shown. */
     private inner class Bridge {
