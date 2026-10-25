@@ -268,6 +268,23 @@
             <View android:id="@+id/rule_4" style="@style/SetupRule" />
 
             <LinearLayout
+                android:id="@+id/row_clear_history"
+                style="@style/SetupRow">
+
+                <TextView
+                    style="@style/SetupRowTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/row_clear_history" />
+
+                <TextView
+                    android:id="@+id/txt_history"
+                    style="@style/SetupRowValue" />
+            </LinearLayout>
+
+            <View android:id="@+id/rule_5" style="@style/SetupRule" />
+
+            <LinearLayout
                 android:id="@+id/row_android_auto"
                 style="@style/SetupRow">
 

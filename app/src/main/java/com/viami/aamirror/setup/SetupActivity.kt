@@ -96,6 +96,19 @@ class SetupActivity : ComponentActivity() {
         findViewById<View>(R.id.row_bookmarks).setOnClickListener {
             startActivity(Intent(this, BookmarksActivity::class.java))
         }
+        findViewById<View>(R.id.row_clear_history).setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.row_clear_history)
+                .setMessage(R.string.clear_history_message)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.clear_history_confirm) { _, _ ->
+                    HistoryStore.clear(this)
+                    BrowserDisplay.refreshHome()
+                    render(MirrorGateway.state.value)
+                    Toast.makeText(this, R.string.history_cleared, Toast.LENGTH_SHORT).show()
+                }
+                .show()
+        }
         findViewById<View>(R.id.row_android_auto).setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(R.string.row_android_auto)
@@ -146,7 +159,9 @@ class SetupActivity : ComponentActivity() {
         val query = findViewById<EditText>(R.id.edit_url).text.toString()
         if (query.isBlank()) return
         if (BrowserDisplay.isAttached) {
-            BrowserDisplay.loadUrl(UrlResolver.resolve(query))
+            val url = UrlResolver.resolve(query)
+            HistoryStore.markSent(this, url)
+            BrowserDisplay.loadUrl(url)
             Toast.makeText(this, R.string.opened_in_car, Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, R.string.car_not_connected, Toast.LENGTH_LONG).show()
@@ -178,6 +193,7 @@ class SetupActivity : ComponentActivity() {
         }
         findViewById<TextView>(R.id.txt_bookmarks).text =
             "${BookmarkStore.load(this).size}  ›"
+        findViewById<TextView>(R.id.txt_history).text = HistoryStore.load(this).size.toString()
     }
 
     /** "Ativo" in the quiet colour when granted, "Ativar" in the accent when it still needs a tap. */
@@ -291,6 +307,7 @@ class SetupActivity : ComponentActivity() {
         }
         findViewById<TextView>(R.id.txt_android_auto).setTextColor(p.muted)
         findViewById<TextView>(R.id.txt_bookmarks).setTextColor(p.muted)
+        findViewById<TextView>(R.id.txt_history).setTextColor(p.muted)
 
         // The car start page follows the same theme.
         BrowserDisplay.refreshHome()

@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import com.viami.aamirror.browser.BrowserDisplay
 import com.viami.aamirror.core.UrlResolver
+import com.viami.aamirror.setup.HistoryStore
 import com.viami.aamirror.share.ShareInbox
 import com.viami.aamirror.share.ShareServer
 import kotlinx.coroutines.launch
@@ -33,7 +34,9 @@ class MirrorSession : Session(), DefaultLifecycleObserver {
     }
 
     private fun openInBrowser(url: String) {
-        BrowserDisplay.loadUrl(UrlResolver.resolve(url))
+        val resolved = UrlResolver.resolve(url)
+        HistoryStore.markSent(carContext, resolved)
+        BrowserDisplay.loadUrl(resolved)
         val manager = carContext.getCarService(ScreenManager::class.java)
         manager.popToRoot()
         manager.push(BrowserScreen(carContext))

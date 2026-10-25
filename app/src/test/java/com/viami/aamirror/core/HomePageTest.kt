@@ -65,6 +65,35 @@ class HomePageTest {
     }
 
     @Test
+    fun `recents list each page with when it was opened`() {
+        val html = HomePage.render(
+            palette, emptyList(),
+            recents = listOf(RecentLink("Previsão — São Paulo", "https://clima.com/sp", "14:10")),
+        )
+        assertTrue(html.contains("href=\"https://clima.com/sp\""))
+        assertTrue(html.contains("Previsão — São Paulo"))
+        assertTrue(html.contains(">14:10<"))
+        assertFalse(html.contains("Os sites que você abrir"))
+    }
+
+    @Test
+    fun `no history shows a hint in recents`() {
+        val html = HomePage.render(palette, emptyList())
+        assertTrue(html.contains("Os sites que você abrir aparecem aqui."))
+    }
+
+    @Test
+    fun `the link sent from the phone is highlighted with its age`() {
+        val html = HomePage.render(
+            palette, emptyList(),
+            sent = SentLink("g1.globo.com", "https://g1.globo.com", "há 2 min"),
+        )
+        assertTrue(html.contains("class=\"sent\" href=\"https://g1.globo.com\""))
+        assertTrue(html.contains("Enviado do celular há 2 min"))
+        assertFalse(html.contains("Os sites que você abrir"))
+    }
+
+    @Test
     fun `home is recognised by its base url`() {
         assertTrue(HomePage.isHome(HomePage.URL))
         assertFalse(HomePage.isHome("https://www.google.com"))

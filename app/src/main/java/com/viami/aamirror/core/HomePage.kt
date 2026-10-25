@@ -3,6 +3,12 @@ package com.viami.aamirror.core
 /** One favourite on the browser start page; [icon] is a data: URI, or null to show the initial. */
 data class HomeTile(val title: String, val url: String, val icon: String?)
 
+/** A row of "Recentes"; [label] is when it was opened ("14:10", "Ontem"). */
+data class RecentLink(val title: String, val url: String, val label: String)
+
+/** The link last sent from the phone; [age] reads like "há 2 min". */
+data class SentLink(val title: String, val url: String, val age: String)
+
 /**
  * The browser start page shown on the car display: clock, a search pill that
  * opens the car keyboard, and the favourites as large tiles. It is built
@@ -32,8 +38,29 @@ object HomePage {
     fun initialOf(title: String): String =
         title.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?"
 
-    fun render(palette: Palette, tiles: List<HomeTile>): String {
+    fun render(
+        palette: Palette,
+        tiles: List<HomeTile>,
+        recents: List<RecentLink> = emptyList(),
+        sent: SentLink? = null,
+    ): String {
         val p = palette
+        val sentBlock = sent?.let {
+            "<a class=\"sent\" href=\"${escape(it.url)}\">" +
+                "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"${hex(p.accent)}\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"7\" y=\"2\" width=\"10\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>" +
+                "<span class=\"txt\"><span class=\"t\">${escape(it.title)}</span>" +
+                "<span class=\"s\">Enviado do celular ${escape(it.age)}</span></span>" +
+                "<span class=\"open\">Abrir</span></a>"
+        } ?: ""
+        val rows = recents.joinToString("") {
+            "<a class=\"row\" href=\"${escape(it.url)}\"><span class=\"t\">${escape(it.title)}</span>" +
+                "<span class=\"w\">${escape(it.label)}</span></a>"
+        }
+        val recentBody = when {
+            rows.isNotEmpty() -> rows
+            sentBlock.isEmpty() -> "<p class=\"empty\">Os sites que você abrir aparecem aqui.</p>"
+            else -> ""
+        }
         val cells = tiles.joinToString("") { tile ->
             val mark = if (tile.icon != null) {
                 "<span class=\"icon\"><img src=\"${escape(tile.icon)}\" alt=\"\"></span>"
@@ -76,6 +103,20 @@ object HomePage {
             .icon.letter{background:${hex(p.ground)};color:${hex(p.text)};font-size:min(6vh,26px);font-weight:500}
             .name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
             .empty{color:${hex(p.muted)};font-size:min(3.6vh,16px)}
+            .cols{flex:1;min-height:0;display:flex;gap:14px}
+            .cols .card{min-width:0}
+            .recent{flex:0 0 34%;overflow:hidden}
+            .list{display:flex;flex-direction:column;overflow-y:auto}
+            .sent{display:flex;align-items:center;gap:12px;background:${hex(p.raised)};border-radius:14px;
+              padding:1.6vh 14px;color:${hex(p.text)};text-decoration:none;margin-bottom:.8vh}
+            .sent .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+            .t{font-size:min(3.6vh,16px);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .s{font-size:min(3vh,13px);color:${hex(p.muted)}}
+            .open{font-size:min(3.4vh,15px);font-weight:600;flex:none}
+            .row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:min(12vh,62px);
+              border-top:1px solid ${hex(p.raised)};color:${hex(p.text)};text-decoration:none;padding:0 2px}
+            .sent+.row,.list>.row:first-child{border-top:0}
+            .w{flex:none;font-size:min(3vh,13px);color:${hex(p.muted)}}
             </style></head>
             <body>
             <header>
@@ -85,10 +126,16 @@ object HomePage {
                 Pesquisar ou digitar endereço
               </button>
             </header>
+            <div class="cols">
             <section class="card">
               <h2>Favoritos</h2>
               ${if (cells.isEmpty()) "<p class=\"empty\">Adicione favoritos no celular, em RoadFlix → Favoritos.</p>" else "<div class=\"grid\">$cells</div>"}
             </section>
+            <section class="card recent">
+              <h2>Recentes</h2>
+              <div class="list">$sentBlock$recentBody</div>
+            </section>
+            </div>
             <script>
             function tick(){var d=new Date();
               document.getElementById('clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});

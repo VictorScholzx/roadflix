@@ -32,7 +32,11 @@ const val TV_USER_AGENT =
         "(KHTML, like Gecko) Version/5.5 TV Safari/537.36"
 
 /** The plain web browser mode; its home is the local start page with the favourites. */
-val BrowserDisplay: WebDisplay = WebDisplay(homeUrl = HomePage.URL, homePage = BrowserHome::html)
+val BrowserDisplay: WebDisplay = WebDisplay(
+    homeUrl = HomePage.URL,
+    homePage = BrowserHome::html,
+    onVisit = BrowserHome::recordVisit,
+)
 
 /**
  * The YouTube "TV" mode, cast target for the second phone. The TV interface
@@ -59,6 +63,7 @@ class WebDisplay(
     private val logicalWidth: Int? = null,
     private val scrollWithKeys: Boolean = false,
     private val homePage: ((Context) -> String)? = null,
+    private val onVisit: ((Context, String, String) -> Unit)? = null,
 ) {
 
     /** Called when the start page's search pill is tapped; the car screen opens its keyboard. */
@@ -125,6 +130,7 @@ class WebDisplay(
                     override fun onPageFinished(view: WebView, url: String) {
                         currentUrl = url
                         applyVideoFit(view)
+                        appContext?.let { onVisit?.invoke(it, url, view.title.orEmpty()) }
                     }
                 }
             }

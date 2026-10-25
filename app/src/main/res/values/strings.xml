@@ -77,6 +77,10 @@
     <string name="opened_in_car">Aberto na central do carro</string>
     <string name="car_not_connected">O carro não está conectado: abra o RoadFlix → Navegador na central</string>
     <string name="row_android_auto">Ativar no Android Auto</string>
+    <string name="row_clear_history">Limpar histórico</string>
+    <string name="clear_history_message">Apagar os sites recentes e o link enviado do celular? Os favoritos continuam.</string>
+    <string name="clear_history_confirm">Limpar</string>
+    <string name="history_cleared">Histórico apagado</string>
     <string name="accessibility_description">Permite que o RoadFlix envie toques, Voltar e Início a partir da central do carro</string>
     <string name="setup_instructions">Configuração única no Android Auto:\n\n1. App Android Auto → Configurações → toque 10 vezes em "Versão" para ativar o modo desenvolvedor.\n2. Menu ⋮ → Configurações do desenvolvedor → ative "Fontes desconhecidas".\n3. Configurações → Personalizar acesso rápido → marque o RoadFlix.</string>
     <string name="ok">Ok</string>
