@@ -77,6 +77,31 @@ class HomePageTest {
     }
 
     @Test
+    fun `recent rows show the site icon or its initial`() {
+        val html = HomePage.render(
+            palette, emptyList(),
+            recents = listOf(
+                RecentLink("YouTube", "https://youtube.com", "14:00", "data:image/png;base64,BBB"),
+                RecentLink("wikipedia.org", "https://wikipedia.org", "13:00"),
+            ),
+        )
+        assertTrue(html.contains("<span class=\"mini\"><img src=\"data:image/png;base64,BBB\""))
+        assertTrue(html.contains("<span class=\"mini letter\">W</span>"))
+    }
+
+    @Test
+    fun `every recent row and the sent link have a remove button`() {
+        val html = HomePage.render(
+            palette, emptyList(),
+            recents = listOf(RecentLink("A", "https://a.com/x?y=1&z=2", "14:00")),
+            sent = SentLink("b.com", "https://b.com", "agora"),
+        )
+        assertTrue(html.contains("data-url=\"https://a.com/x?y=1&amp;z=2\""))
+        assertTrue(html.contains("${HomePage.BRIDGE}.removeRecent(this.dataset.url)"))
+        assertTrue(html.contains("${HomePage.BRIDGE}.removeSent()"))
+    }
+
+    @Test
     fun `no history shows a hint in recents`() {
         val html = HomePage.render(palette, emptyList())
         assertTrue(html.contains("Os sites que você abrir aparecem aqui."))

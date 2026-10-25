@@ -29,10 +29,21 @@ object FaviconCache {
     private fun file(context: Context, host: String) =
         File(File(context.filesDir, DIR), "$host.png")
 
+    /**
+     * The host and its parent domains, most specific first: "m.youtube.com" → "m.youtube.com",
+     * "youtube.com". Mobile and regional subdomains rarely have icons of their own.
+     */
+    private fun candidates(host: String): List<String> {
+        val labels = host.split('.')
+        return (0..labels.size - 2).map { labels.drop(it).joinToString(".") }
+    }
+
+    private fun cachedFile(context: Context, host: String): File? =
+        candidates(host).map { file(context, it) }.firstOrNull { it.isFile && it.length() > 0 }
+
     /** The cached icon as a data: URI, or null when it has not been fetched (or does not exist). */
     fun dataUri(context: Context, host: String): String? {
-        val f = file(context, host)
-        if (!f.isFile || f.length() == 0L) return null
+        val f = cachedFile(context, host) ?: return null
         return "data:image/png;base64," + Base64.encodeToString(f.readBytes(), Base64.NO_WRAP)
     }
 
@@ -44,10 +55,13 @@ object FaviconCache {
         withContext(Dispatchers.IO) {
             var fetched = false
             for (host in hosts.distinct()) {
-                if (host.isBlank() || file(context, host).isFile) continue
-                val bytes = sources(host).firstNotNullOfOrNull { download(it) } ?: continue
-                file(context, host).apply { parentFile?.mkdirs() }.writeBytes(bytes)
-                fetched = true
+                if (host.isBlank() || cachedFile(context, host) != null) continue
+                for (candidate in candidates(host)) {
+                    val bytes = sources(candidate).firstNotNullOfOrNull { download(it) } ?: continue
+                    file(context, candidate).apply { parentFile?.mkdirs() }.writeBytes(bytes)
+                    fetched = true
+                    break
+                }
             }
             fetched
         }

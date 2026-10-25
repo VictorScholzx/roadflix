@@ -32,6 +32,17 @@ class HistoryTest {
     }
 
     @Test
+    fun `ad redirects are not recorded`() {
+        assertTrue(History.add(emptyList(), HistoryEntry("Atenção!", "https://groomin.space/click?key=5", 1)).isEmpty())
+    }
+
+    @Test
+    fun `remove drops only that page`() {
+        val list = listOf(HistoryEntry("A", "https://a.com", 2), HistoryEntry("B", "https://b.com", 1))
+        assertEquals(listOf("https://b.com"), History.remove(list, "https://a.com").map { it.url })
+    }
+
+    @Test
     fun `a page with no title is listed by its host`() {
         val list = History.add(emptyList(), HistoryEntry("  ", "https://www.g1.globo.com/x", 1))
         assertEquals("g1.globo.com", list.single().title)

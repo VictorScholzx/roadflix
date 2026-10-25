@@ -14,8 +14,10 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
 import android.webkit.JavascriptInterface
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.viami.aamirror.core.AdFilter
 import com.viami.aamirror.core.ArrowKey
 import com.viami.aamirror.core.GesturePoint
 import com.viami.aamirror.core.HomePage
@@ -23,6 +25,7 @@ import com.viami.aamirror.core.KeyScroll
 import com.viami.aamirror.core.MirrorSettings
 import com.viami.aamirror.core.ScrollGesture
 import com.viami.aamirror.core.WebViewport
+import com.viami.aamirror.setup.HistoryStore
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
@@ -36,6 +39,7 @@ val BrowserDisplay: WebDisplay = WebDisplay(
     homeUrl = HomePage.URL,
     homePage = BrowserHome::html,
     onVisit = BrowserHome::recordVisit,
+    blockAdRedirects = true,
 )
 
 /**
@@ -64,6 +68,7 @@ class WebDisplay(
     private val scrollWithKeys: Boolean = false,
     private val homePage: ((Context) -> String)? = null,
     private val onVisit: ((Context, String, String) -> Unit)? = null,
+    private val blockAdRedirects: Boolean = false,
 ) {
 
     /** Called when the start page's search pill is tapped; the car screen opens its keyboard. */
@@ -127,6 +132,14 @@ class WebDisplay(
                     setInitialScale(scalePercent)
                 }
                 webViewClient = object : WebViewClient() {
+                    /** Ad-network redirects ("Atenção!" pages) are dropped instead of opened. */
+                    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                        val blocked = blockAdRedirects && request.isForMainFrame &&
+                            AdFilter.isAdRedirect(request.url.toString())
+                        if (blocked) Log.i(TAG, "blocked ad redirect ${request.url.host}")
+                        return blocked
+                    }
+
                     override fun onPageFinished(view: WebView, url: String) {
                         currentUrl = url
                         applyVideoFit(view)
@@ -201,6 +214,26 @@ class WebDisplay(
         fun search() {
             mainHandler.post {
                 if (HomePage.isHome(webView?.url)) onSearchRequest?.invoke()
+            }
+        }
+
+        @JavascriptInterface
+        fun removeRecent(url: String) {
+            mainHandler.post {
+                val context = appContext ?: return@post
+                if (!HomePage.isHome(webView?.url)) return@post
+                HistoryStore.remove(context, url)
+                refreshHome()
+            }
+        }
+
+        @JavascriptInterface
+        fun removeSent() {
+            mainHandler.post {
+                val context = appContext ?: return@post
+                if (!HomePage.isHome(webView?.url)) return@post
+                HistoryStore.clearSent(context)
+                refreshHome()
             }
         }
     }

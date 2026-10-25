@@ -20,7 +20,8 @@ object History {
     fun isRecordable(url: String?): Boolean =
         url != null &&
             (url.startsWith("http://") || url.startsWith("https://")) &&
-            !HomePage.isHome(url)
+            !HomePage.isHome(url) &&
+            !AdFilter.isAdRedirect(url)
 
     /** Adds a visit on top; visiting a page again moves it up instead of listing it twice. */
     fun add(entries: List<HistoryEntry>, entry: HistoryEntry): List<HistoryEntry> {
@@ -29,6 +30,9 @@ object History {
         return (listOf(entry.copy(title = title)) + entries.filter { it.url != entry.url })
             .take(MAX_ENTRIES)
     }
+
+    fun remove(entries: List<HistoryEntry>, url: String): List<HistoryEntry> =
+        entries.filter { it.url != url }
 
     /** "14:10" today, "Ontem" yesterday, otherwise the date. */
     fun whenLabel(at: Long, now: Long, zone: ZoneId = ZoneId.systemDefault()): String {

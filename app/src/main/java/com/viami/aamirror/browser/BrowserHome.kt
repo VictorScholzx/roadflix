@@ -39,13 +39,24 @@ object BrowserHome {
         val recents = history
             .filter { it.url != sent?.url }
             .take(RECENT_ROWS)
-            .map { RecentLink(it.title, it.url, History.whenLabel(it.at, now)) }
+            .map {
+                RecentLink(
+                    title = it.title,
+                    url = it.url,
+                    label = History.whenLabel(it.at, now),
+                    icon = FaviconCache.dataUri(context, HomePage.hostOf(it.url)),
+                )
+            }
         val theme = AppTheme.resolve(MirrorSettings.theme, MirrorSettings.autoTheme, isNight(context))
         return HomePage.render(theme.palette, tiles, recents, sent)
     }
 
+    /** Hosts whose icons the start page shows: the favourites and the recent pages. */
     fun hosts(context: Context): List<String> =
-        BookmarkStore.load(context).map { HomePage.hostOf(it.url) }
+        (BookmarkStore.load(context).map { it.url } +
+            HistoryStore.load(context).take(RECENT_ROWS + 1).map { it.url })
+            .map { HomePage.hostOf(it) }
+            .distinct()
 
     /** Called for every page the car browser finishes loading. */
     fun recordVisit(context: Context, url: String, title: String) {

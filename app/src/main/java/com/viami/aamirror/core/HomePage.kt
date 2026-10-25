@@ -3,8 +3,8 @@ package com.viami.aamirror.core
 /** One favourite on the browser start page; [icon] is a data: URI, or null to show the initial. */
 data class HomeTile(val title: String, val url: String, val icon: String?)
 
-/** A row of "Recentes"; [label] is when it was opened ("14:10", "Ontem"). */
-data class RecentLink(val title: String, val url: String, val label: String)
+/** A row of "Recentes"; [label] is when it was opened ("14:10", "Ontem"), [icon] as in [HomeTile]. */
+data class RecentLink(val title: String, val url: String, val label: String, val icon: String? = null)
 
 /** The link last sent from the phone; [age] reads like "há 2 min". */
 data class SentLink(val title: String, val url: String, val age: String)
@@ -46,15 +46,23 @@ object HomePage {
     ): String {
         val p = palette
         val sentBlock = sent?.let {
-            "<a class=\"sent\" href=\"${escape(it.url)}\">" +
+            "<div class=\"item\"><a class=\"sent\" href=\"${escape(it.url)}\">" +
                 "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"${hex(p.accent)}\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"7\" y=\"2\" width=\"10\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>" +
                 "<span class=\"txt\"><span class=\"t\">${escape(it.title)}</span>" +
                 "<span class=\"s\">Enviado do celular ${escape(it.age)}</span></span>" +
-                "<span class=\"open\">Abrir</span></a>"
+                "<span class=\"open\">Abrir</span></a>" +
+                "<button class=\"del\" aria-label=\"Remover\" onclick=\"$BRIDGE.removeSent()\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/></svg></button></div>"
         } ?: ""
         val rows = recents.joinToString("") {
-            "<a class=\"row\" href=\"${escape(it.url)}\"><span class=\"t\">${escape(it.title)}</span>" +
-                "<span class=\"w\">${escape(it.label)}</span></a>"
+            val mark = if (it.icon != null) {
+                "<span class=\"mini\"><img src=\"${escape(it.icon)}\" alt=\"\"></span>"
+            } else {
+                "<span class=\"mini letter\">${escape(initialOf(it.title))}</span>"
+            }
+            "<div class=\"item\"><a class=\"row\" href=\"${escape(it.url)}\">$mark<span class=\"t\">${escape(it.title)}</span>" +
+                "<span class=\"w\">${escape(it.label)}</span></a>" +
+                "<button class=\"del\" aria-label=\"Remover\" data-url=\"${escape(it.url)}\" " +
+                "onclick=\"$BRIDGE.removeRecent(this.dataset.url)\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/></svg></button></div>"
         }
         val recentBody = when {
             rows.isNotEmpty() -> rows
@@ -115,8 +123,18 @@ object HomePage {
             .open{font-size:min(3.4vh,15px);font-weight:600;flex:none}
             .row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:min(12vh,62px);
               border-top:1px solid ${hex(p.raised)};color:${hex(p.text)};text-decoration:none;padding:0 2px}
-            .sent+.row,.list>.row:first-child{border-top:0}
+            .item{display:flex;align-items:center;gap:6px}
+            .item .row,.item .sent{flex:1;min-width:0}
+            .list>.item:first-child .row{border-top:0}
+            .del{flex:none;width:min(10vh,44px);height:min(10vh,44px);border:0;border-radius:12px;background:transparent;
+              color:${hex(p.muted)};display:flex;align-items:center;justify-content:center}
+            .del:active{background:${hex(p.raised)}}
             .w{flex:none;font-size:min(3vh,13px);color:${hex(p.muted)}}
+            .row .t{flex:1;min-width:0}
+            .mini{width:min(5.2vh,24px);height:min(5.2vh,24px);border-radius:24%;background:#fff;flex:none;
+              display:flex;align-items:center;justify-content:center}
+            .mini img{width:70%;height:70%;object-fit:contain}
+            .mini.letter{background:${hex(p.ground)};color:${hex(p.text)};font-size:min(2.8vh,12px);font-weight:500}
             </style></head>
             <body>
             <header>
