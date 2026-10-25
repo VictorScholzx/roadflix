@@ -442,7 +442,7 @@ Prioridades identificadas pela auditoria: abas, histórico, botão avançar, tem
 **Ordem de implementação proposta:**
 1. ✅ **Concluída em 24/10/2026:** tela do celular nova (português, visual aprovado) **com o seletor de temas**. Seis temas + Automático (por enquanto segue o modo claro/escuro do celular; no carro vai seguir o dia/noite da central). Permissões com status "Ativo"/"Ativar", envio de link, favoritos e passo a passo do Android Auto. Notificação e tela de favoritos em português. Barras do sistema seguem o tema. Lógica dos temas coberta por testes (`AppThemeTest`, 70 testes no total, 0 falhas). Testada pelo usuário no Redmi Note 8.
    - Detalhe conhecido: logo após reinstalar, "Toque pela central" pode mostrar "Ativar" por alguns segundos, até o Android religar o serviço de acessibilidade.
-2. Página inicial local do navegador (relógio, pesquisa, favoritos) seguindo o tema; botões da lateral trocados para menu, voltar, avançar e início.
+2. ✅ **Concluída em 24/10/2026:** página inicial local do navegador (relógio, data, barra de pesquisa que abre o teclado do Android Auto, favoritos em blocos) seguindo o tema; no modo Automático acompanha o dia/noite da central (`CarContext.isDarkMode`). Ícones dos favoritos buscados automaticamente (`apple-touch-icon` do site, com o serviço de favicons do Google como reserva) e guardados no celular para funcionar sem internet; sem ícone, mostra a inicial. "Navegador" abre direto a página inicial (a lista de favoritos do Android Auto foi removida). Botões da lateral: menu, voltar, avançar e início. 78 testes, 0 falhas. Testada pelo usuário no DHU (favoritos, botões e pesquisa).
 3. Textos e ícones dos menus do carro em português.
 4. Histórico (Recentes) e destaque do link enviado pelo celular.
 5. Abas.

@@ -13,23 +13,26 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.viami.aamirror.core.ArrowKey
 import com.viami.aamirror.core.GesturePoint
+import com.viami.aamirror.core.HomePage
 import com.viami.aamirror.core.KeyScroll
 import com.viami.aamirror.core.MirrorSettings
 import com.viami.aamirror.core.ScrollGesture
-import com.viami.aamirror.core.UrlResolver
 import com.viami.aamirror.core.WebViewport
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 /** Smart-TV user agent so youtube.com/tv serves the leanback interface. */
 const val TV_USER_AGENT =
     "Mozilla/5.0 (SMART-TV; Linux; Tizen 5.5) AppleWebKit/537.36 " +
         "(KHTML, like Gecko) Version/5.5 TV Safari/537.36"
 
-/** The plain web browser mode. */
-val BrowserDisplay: WebDisplay = WebDisplay(homeUrl = UrlResolver.HOME)
+/** The plain web browser mode; its home is the local start page with the favourites. */
+val BrowserDisplay: WebDisplay = WebDisplay(homeUrl = HomePage.URL, homePage = BrowserHome::html)
 
 /**
  * The YouTube "TV" mode, cast target for the second phone. The TV interface
@@ -55,7 +58,14 @@ class WebDisplay(
     private val userAgent: String? = null,
     private val logicalWidth: Int? = null,
     private val scrollWithKeys: Boolean = false,
+    private val homePage: ((Context) -> String)? = null,
 ) {
+
+    /** Called when the start page's search pill is tapped; the car screen opens its keyboard. */
+    var onSearchRequest: (() -> Unit)? = null
+
+    private val scope = MainScope()
+    private var appContext: Context? = null
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var virtualDisplay: VirtualDisplay? = null
@@ -118,9 +128,12 @@ class WebDisplay(
                     }
                 }
             }
+            if (homePage != null) web.addJavascriptInterface(Bridge(), HomePage.BRIDGE)
             shown.setContentView(web)
             shown.show()
-            web.loadUrl(currentUrl)
+            appContext = context
+            loadInto(web, currentUrl)
+            if (homePage != null) fetchIcons(context)
             virtualDisplay = display
             presentation = shown
             webView = web
@@ -143,7 +156,47 @@ class WebDisplay(
 
     fun loadUrl(url: String) {
         currentUrl = url
-        mainHandler.post { webView?.loadUrl(url) }
+        mainHandler.post { webView?.let { loadInto(it, url) } }
+    }
+
+    /** The start page is generated locally; everything else is a normal load. */
+    private fun loadInto(web: WebView, url: String) {
+        val context = appContext
+        if (homePage != null && context != null && HomePage.isHome(url)) {
+            web.loadDataWithBaseURL(HomePage.URL, homePage.invoke(context), "text/html", "utf-8", HomePage.URL)
+        } else {
+            web.loadUrl(url)
+        }
+    }
+
+    /** Redraws the start page if it is showing, after a theme change or new icons. */
+    fun refreshHome() {
+        mainHandler.post {
+            val web = webView ?: return@post
+            if (HomePage.isHome(web.url)) loadInto(web, HomePage.URL)
+            // A favourite added on the phone gets its icon on the next refresh.
+            appContext?.let { fetchIcons(it) }
+        }
+    }
+
+    private fun fetchIcons(context: Context) {
+        scope.launch {
+            if (FaviconCache.fetchMissing(context, BrowserHome.hosts(context))) refreshHome()
+        }
+    }
+
+    fun goForward() {
+        mainHandler.post { webView?.let { if (it.canGoForward()) it.goForward() } }
+    }
+
+    /** What the start page's JavaScript can call; it only acts while the start page is shown. */
+    private inner class Bridge {
+        @JavascriptInterface
+        fun search() {
+            mainHandler.post {
+                if (HomePage.isHome(webView?.url)) onSearchRequest?.invoke()
+            }
+        }
     }
 
     /**

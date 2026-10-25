@@ -15,6 +15,7 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.viami.aamirror.R
+import com.viami.aamirror.browser.BrowserDisplay
 import com.viami.aamirror.core.MenuLayout
 import com.viami.aamirror.core.MirrorSettings
 import com.viami.aamirror.setup.SettingsStore
@@ -38,7 +39,8 @@ class HomeScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycleO
             screenManager.push(MirrorScreen(carContext))
         },
         Mode(R.string.menu_browser, R.string.menu_browser_short, R.drawable.ic_globe) {
-            screenManager.push(BookmarksScreen(carContext))
+            BrowserDisplay.goHome()
+            screenManager.push(BrowserScreen(carContext))
         },
         Mode(R.string.menu_youtube, R.string.menu_youtube_short, R.drawable.ic_cast) {
             screenManager.push(YouTubeScreen(carContext))

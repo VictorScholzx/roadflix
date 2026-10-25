@@ -292,6 +292,8 @@ class SetupActivity : ComponentActivity() {
         findViewById<TextView>(R.id.txt_android_auto).setTextColor(p.muted)
         findViewById<TextView>(R.id.txt_bookmarks).setTextColor(p.muted)
 
+        // The car start page follows the same theme.
+        BrowserDisplay.refreshHome()
         render(MirrorGateway.state.value)
     }
 

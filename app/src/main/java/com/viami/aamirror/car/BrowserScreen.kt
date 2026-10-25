@@ -14,6 +14,11 @@ import com.viami.aamirror.R
 import com.viami.aamirror.browser.BrowserDisplay
 import com.viami.aamirror.core.UrlResolver
 
+/**
+ * The browser on the car display. Search lives on the start page itself (its
+ * pill opens the car keyboard), which leaves the four strip slots for
+ * menu, back, forward and home.
+ */
 class BrowserScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycleObserver {
 
     init {
@@ -22,14 +27,21 @@ class BrowserScreen(carContext: CarContext) : Screen(carContext), DefaultLifecyc
 
     override fun onStart(owner: LifecycleOwner) {
         SurfaceRouter.setSink(WebSink.of(carContext, BrowserDisplay))
+        BrowserDisplay.onSearchRequest = { openSearch() }
+        // Favourites or the theme may have changed on the phone in the meantime.
+        BrowserDisplay.refreshHome()
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        BrowserDisplay.onSearchRequest = null
     }
 
     override fun onGetTemplate(): Template {
         val strip = ActionStrip.Builder()
             .addAction(action(R.drawable.ic_menu) { screenManager.pop() })
             .addAction(action(R.drawable.ic_back) { BrowserDisplay.goBack() })
-            .addAction(action(R.drawable.ic_reload) { BrowserDisplay.reload() })
-            .addAction(action(R.drawable.ic_search) { openSearch() })
+            .addAction(action(R.drawable.ic_forward) { BrowserDisplay.goForward() })
+            .addAction(action(R.drawable.ic_home) { BrowserDisplay.goHome() })
             .build()
         return NavigationTemplate.Builder().setActionStrip(strip).withPan().build()
     }
