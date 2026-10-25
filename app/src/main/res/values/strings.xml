@@ -10,38 +10,38 @@
     <string name="start_request_title">RoadFlix</string>
     <string name="start_request_text">Toque para autorizar o compartilhamento da tela</string>
 
-    <!-- Menu display auto -->
-    <string name="menu_mirror">Mirroring schermo</string>
-    <!-- Le celle della griglia troncano: titoli brevi -->
-    <string name="menu_mirror_short">Mirroring</string>
-    <string name="menu_browser_short">Browser</string>
+    <!-- Menu na central do carro -->
+    <string name="menu_mirror">Espelhar tela</string>
+    <!-- As células da grade cortam títulos longos: versões curtas -->
+    <string name="menu_mirror_short">Espelhar</string>
+    <string name="menu_browser_short">Navegador</string>
     <string name="menu_youtube_short">YouTube</string>
-    <string name="menu_browser">Browser web</string>
-    <string name="menu_youtube">YouTube Cast</string>
-    <string name="settings_title">Impostazioni</string>
-    <string name="settings_layout">Layout menu</string>
-    <string name="layout_row_grid">Griglia — tocca per passare a lista</string>
-    <string name="layout_row_list">Lista — tocca per passare a griglia</string>
-    <string name="menu_rotation">Blocco rotazione orizzontale</string>
-    <string name="rotation_row_on">Attivo — tocca per disattivare</string>
-    <string name="rotation_row_off">Non attivo — tocca per forzare l\'orizzontale</string>
-    <string name="menu_fill">Riempi schermo (mirroring)</string>
-    <string name="fill_row_on">Attivo — l\'immagine riempie lo schermo, bordi ritagliati</string>
-    <string name="fill_row_off">Non attivo — immagine intera con bande nere</string>
+    <string name="menu_browser">Navegador</string>
+    <string name="menu_youtube">YouTube TV</string>
+    <string name="settings_title">Configurações</string>
+    <string name="settings_layout">Formato do menu</string>
+    <string name="layout_row_grid">Grade · toque para mudar para lista</string>
+    <string name="layout_row_list">Lista · toque para mudar para grade</string>
+    <string name="menu_rotation">Trava na horizontal</string>
+    <string name="rotation_row_on">Ligada · toque para desligar</string>
+    <string name="rotation_row_off">Desligada · toque para manter o celular na horizontal</string>
+    <string name="menu_fill">Preencher a tela (espelhamento)</string>
+    <string name="fill_row_on">Ligado · a imagem ocupa a tela toda e corta as bordas</string>
+    <string name="fill_row_off">Desligado · imagem inteira, com faixas pretas</string>
 
-    <!-- Display auto: mirroring -->
-    <string name="car_status_idle">Apri AA Suite sul telefono e autorizza la cattura</string>
-    <string name="car_status_confirm">Conferma sul telefono</string>
-    <string name="car_status_error">Permesso negato: apri l\'app sul telefono e riprova</string>
-    <string name="car_confirm_on_phone">Conferma la cattura schermo sul telefono</string>
-    <string name="car_accessibility_missing">Attiva il servizio Accessibility nelle impostazioni del telefono</string>
-    <string name="car_rotation_locked">Bloccato in orizzontale</string>
-    <string name="car_rotation_unlocked">Rotazione normale</string>
-    <string name="car_overlay_missing">Concedi "Mostra sopra altre app" nell\'app AA Suite sul telefono</string>
+    <!-- Central do carro: espelhamento -->
+    <string name="car_status_idle">Abra o RoadFlix no celular e autorize a captura de tela</string>
+    <string name="car_status_confirm">Confirme no celular</string>
+    <string name="car_status_error">Permissão negada: abra o RoadFlix no celular e tente de novo</string>
+    <string name="car_confirm_on_phone">Confirme a captura de tela no celular</string>
+    <string name="car_accessibility_missing">Ative "Toque pela central" no RoadFlix, no celular</string>
+    <string name="car_rotation_locked">Travado na horizontal</string>
+    <string name="car_rotation_unlocked">Rotação normal</string>
+    <string name="car_overlay_missing">Ative "Trava na horizontal" no RoadFlix, no celular</string>
 
-    <!-- Display auto: browser -->
+    <!-- Central do carro: navegador -->
     <string name="search_hint">Endereço ou pesquisa</string>
-    <string name="row_search">Cerca o apri URL…</string>
+    <string name="row_search">Pesquisar ou digitar endereço…</string>
     <string name="bookmarks_title">Favoritos</string>
     <string name="btn_bookmarks">Favoritos</string>
     <string name="btn_add_bookmark">Adicionar favorito</string>

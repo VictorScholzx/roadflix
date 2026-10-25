@@ -28,7 +28,7 @@ fun MirrorState.reduce(event: MirrorEvent): MirrorState = when (event) {
     MirrorEvent.ProjectionStopped ->
         copy(projection = ProjectionStatus.NONE)
     MirrorEvent.PermissionDenied ->
-        copy(projection = ProjectionStatus.NONE, lastError = "Permesso di cattura negato")
+        copy(projection = ProjectionStatus.NONE, lastError = "Captura de tela negada")
     MirrorEvent.SurfaceAvailable ->
         copy(surfaceAttached = true)
     MirrorEvent.SurfaceDestroyed ->

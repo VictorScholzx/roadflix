@@ -35,14 +35,14 @@ class HomeScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycleO
     )
 
     private val modes = listOf(
-        Mode(R.string.menu_mirror, R.string.menu_mirror_short, R.drawable.ic_app) {
+        Mode(R.string.menu_mirror, R.string.menu_mirror_short, R.drawable.ic_mode_mirror) {
             screenManager.push(MirrorScreen(carContext))
         },
         Mode(R.string.menu_browser, R.string.menu_browser_short, R.drawable.ic_globe) {
             BrowserDisplay.goHome()
             screenManager.push(BrowserScreen(carContext))
         },
-        Mode(R.string.menu_youtube, R.string.menu_youtube_short, R.drawable.ic_cast) {
+        Mode(R.string.menu_youtube, R.string.menu_youtube_short, R.drawable.ic_mode_youtube) {
             screenManager.push(YouTubeScreen(carContext))
         },
     )
