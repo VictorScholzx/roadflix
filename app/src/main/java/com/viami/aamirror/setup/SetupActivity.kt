@@ -31,6 +31,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.viami.aamirror.R
 import com.viami.aamirror.browser.BrowserDisplay
+import com.viami.aamirror.browser.MenuDisplay
 import com.viami.aamirror.core.AppTheme
 import com.viami.aamirror.core.UrlResolver
 import com.viami.aamirror.core.MirrorEvent
@@ -309,7 +310,8 @@ class SetupActivity : ComponentActivity() {
         findViewById<TextView>(R.id.txt_bookmarks).setTextColor(p.muted)
         findViewById<TextView>(R.id.txt_history).setTextColor(p.muted)
 
-        // The car start page follows the same theme.
+        // The car menu and start page follow the same theme.
+        MenuDisplay.refreshHome()
         BrowserDisplay.refreshHome()
         render(MirrorGateway.state.value)
     }

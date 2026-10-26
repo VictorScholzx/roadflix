@@ -457,6 +457,7 @@ Prioridades identificadas pela auditoria: abas, histórico, botão avançar, tem
 - **Ícones da central enviados como imagem** (`CarIcons`): o Android Auto guarda ícones por número de recurso e mostrava figuras antigas quando os números mudavam.
 - **Controles do navegador desenhados pelo app:** voltar, avançar e início numa pílula vertical logo abaixo do ≡ do Android Auto (que o Android Auto obriga a ter e não deixa mover). Recolhida, vira uma abinha colada no ≡ (seta ⌄ abre, ⌃ fecha), começa sempre recolhida e aparece/some junto com o ≡ (~10 s após um toque). Aberta, a página inicial abre espaço para ela; recolhida, a barra de pesquisa e os cards vão até a borda.
 - **Corrigido:** a página inicial não atualizava em alguns casos, porque o WebView informa páginas geradas como `data:`; agora o app usa o próprio controle de abas.
+- **Testado no Geely EX2 Pro pelo usuário (26/10/2026):** tudo funcionando. Única correção pedida: o menu do carro não mudava de tema sozinho quando o tema era trocado no celular (o navegador já mudava). Corrigido (`SetupActivity` atualiza também o `MenuDisplay`) e confirmado pelo usuário no DHU.
 - Observação de teste: com a janela do DHU **maximizada**, toques perto da borda direita não chegam ao app (defeito do emulador); no tamanho normal funciona.
 
 ---
