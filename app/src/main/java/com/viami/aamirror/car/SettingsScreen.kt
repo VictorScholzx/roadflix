@@ -4,16 +4,13 @@ import androidx.car.app.CarContext
 import androidx.car.app.CarToast
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
-import androidx.core.graphics.drawable.IconCompat
 import com.viami.aamirror.R
 import com.viami.aamirror.browser.BrowserDisplay
 import com.viami.aamirror.browser.YouTubeDisplay
-import com.viami.aamirror.core.MenuLayout
 import com.viami.aamirror.core.MirrorSettings
 import com.viami.aamirror.input.RotationLock
 import com.viami.aamirror.setup.SettingsStore
@@ -23,7 +20,6 @@ class SettingsScreen(carContext: CarContext) : Screen(carContext) {
 
     override fun onGetTemplate(): Template {
         val list = ItemList.Builder()
-            .addItem(layoutRow())
             .addItem(rotationRow())
             .addItem(fillRow())
             .build()
@@ -32,19 +28,6 @@ class SettingsScreen(carContext: CarContext) : Screen(carContext) {
             .setTitle(carContext.getString(R.string.settings_title))
             .setHeaderAction(Action.BACK)
             .build()
-    }
-
-    private fun layoutRow(): Row {
-        val state = if (MirrorSettings.menuLayout == MenuLayout.GRID) {
-            R.string.layout_row_grid
-        } else {
-            R.string.layout_row_list
-        }
-        return row(R.string.settings_layout, state, R.drawable.ic_grid) {
-            MirrorSettings.menuLayout = MirrorSettings.menuLayout.toggled()
-            SettingsStore.save(carContext)
-            invalidate()
-        }
     }
 
     private fun rotationRow(): Row {
@@ -91,9 +74,7 @@ class SettingsScreen(carContext: CarContext) : Screen(carContext) {
         Row.Builder()
             .setTitle(carContext.getString(titleRes))
             .addText(carContext.getString(stateRes))
-            .setImage(
-                CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes)).build()
-            )
+            .setImage(CarIcons.of(carContext, iconRes))
             .setOnClickListener(onClick)
             .build()
 }

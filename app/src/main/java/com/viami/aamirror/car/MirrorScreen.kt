@@ -7,10 +7,8 @@ import androidx.car.app.Screen
 import androidx.car.app.SurfaceContainer
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
-import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
-import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -176,11 +174,7 @@ class MirrorScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycl
 
     private fun action(iconRes: Int, onClick: () -> Unit): Action =
         Action.Builder()
-            .setIcon(
-                CarIcon.Builder(
-                    IconCompat.createWithResource(carContext, iconRes)
-                ).build()
-            )
+            .setIcon(CarIcons.of(carContext, iconRes))
             .setOnClickListener(onClick)
             .build()
 }

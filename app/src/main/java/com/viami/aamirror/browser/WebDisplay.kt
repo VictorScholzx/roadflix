@@ -3,6 +3,7 @@ package com.viami.aamirror.browser
 import android.annotation.SuppressLint
 import android.app.Presentation
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
@@ -25,13 +26,16 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.viami.aamirror.R
 import com.viami.aamirror.core.AdFilter
 import com.viami.aamirror.core.ArrowKey
 import com.viami.aamirror.core.GesturePoint
 import com.viami.aamirror.core.HomePage
 import com.viami.aamirror.core.KeyScroll
+import com.viami.aamirror.core.MenuPage
 import com.viami.aamirror.core.MirrorSettings
 import com.viami.aamirror.core.Palette
 import com.viami.aamirror.core.ScrollGesture
@@ -53,6 +57,12 @@ val BrowserDisplay: WebDisplay = WebDisplay(
     onVisit = BrowserHome::recordVisit,
     blockAdRedirects = true,
     tabPalette = BrowserHome::palette,
+)
+
+/** RoadFlix's own main menu, drawn on the car surface in the chosen theme. */
+val MenuDisplay: WebDisplay = WebDisplay(
+    homeUrl = MenuPage.URL,
+    homePage = { context -> MenuPage.render(BrowserHome.palette(context)) },
 )
 
 /**
@@ -89,6 +99,10 @@ class WebDisplay(
     /** Called when the start page's search pill is tapped; the car screen opens its keyboard. */
     var onSearchRequest: (() -> Unit)? = null
 
+    /** Called with the target of a tapped roadflix:// link ("browser", "mirror", ...). */
+    var onAppLink: ((String) -> Unit)? = null
+
+
     private val scope = MainScope()
     private var appContext: Context? = null
 
@@ -103,6 +117,7 @@ class WebDisplay(
     private val views = mutableListOf<WebView>()
     private var container: FrameLayout? = null
     private var tabBar: LinearLayout? = null
+    private var controls: LinearLayout? = null
     private var scalePercent = 100
 
     private val webView: WebView?
@@ -142,6 +157,8 @@ class WebDisplay(
             )
             val shown = Presentation(context, display.display)
             appContext = context
+            // The control pill always starts folded away.
+            MirrorSettings.controlsCollapsed = true
             val pages = FrameLayout(shown.context)
             container = pages
             if (tabPalette != null) {
@@ -153,17 +170,34 @@ class WebDisplay(
                 tabBar = bar
                 root.addView(bar, LinearLayout.LayoutParams(MATCH_PARENT, dp(shown.context, 60)))
                 root.addView(pages, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f))
-                shown.setContentView(root)
+                // Back, forward and home float as a vertical pill on the right, drawn by the app
+                // so it can be folded away. It hangs right under Android Auto's own ≡ button
+                // (which the host draws in the top right corner and cannot be moved), lined up
+                // with it and the same size, so the two read as one column.
+                val pill = LinearLayout(shown.context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER_HORIZONTAL
+                }
+                controls = pill
+                val frame = FrameLayout(shown.context)
+                frame.addView(root, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+                frame.addView(
+                    pill,
+                    FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.END or Gravity.TOP),
+                )
+                shown.setContentView(frame)
             } else {
                 shown.setContentView(pages)
             }
             tabs.tabs.forEach { tab -> addView(shown.context, tab.url) }
             showActive()
             shown.show()
-            if (homePage != null) fetchIcons(context)
+            if (tabPalette != null) fetchIcons(context)
             virtualDisplay = display
             presentation = shown
             renderTabBar()
+            // Android Auto shows its ≡ when the screen opens; the handle comes up with it.
+            wakeControls()
         }
     }
 
@@ -173,6 +207,7 @@ class WebDisplay(
 
     private fun detachNow() {
         cancelGesture()
+        mainHandler.removeCallbacks(fadeControls)
         presentation?.dismiss()
         views.forEach { it.destroy() }
         views.clear()
@@ -181,6 +216,7 @@ class WebDisplay(
         virtualDisplay = null
         container = null
         tabBar = null
+        controls = null
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -200,6 +236,10 @@ class WebDisplay(
             webViewClient = object : WebViewClient() {
                 /** Ad-network redirects ("Atenção!" pages) are dropped instead of opened. */
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                    MenuPage.target(request.url.toString())?.let { target ->
+                        mainHandler.post { onAppLink?.invoke(target) }
+                        return true
+                    }
                     val blocked = blockAdRedirects && request.isForMainFrame &&
                         AdFilter.isAdRedirect(request.url.toString())
                     if (blocked) Log.i(TAG, "blocked ad redirect ${request.url.host}")
@@ -208,7 +248,9 @@ class WebDisplay(
 
                 override fun onPageFinished(view: WebView, url: String) {
                     val index = views.indexOf(view)
-                    if (index >= 0) tabs = tabs.update(index, url, view.title.orEmpty())
+                    // A generated page reports a "data:" URL; the tab keeps its real address.
+                    val shown = if (url.startsWith("data:") && showsHome(index)) tabs.tabs[index].url else url
+                    if (index >= 0) tabs = tabs.update(index, shown, view.title.orEmpty())
                     applyVideoFit(view)
                     appContext?.let { onVisit?.invoke(it, url, view.title.orEmpty()) }
                     renderTabBar()
@@ -238,8 +280,8 @@ class WebDisplay(
     /** The start page is generated locally; everything else is a normal load. */
     private fun loadInto(web: WebView, url: String) {
         val context = appContext
-        if (homePage != null && context != null && HomePage.isHome(url)) {
-            web.loadDataWithBaseURL(HomePage.URL, homePage.invoke(context), "text/html", "utf-8", HomePage.URL)
+        if (homePage != null && context != null && isHomeUrl(url)) {
+            web.loadDataWithBaseURL(homeUrl, homePage.invoke(context), "text/html", "utf-8", homeUrl)
         } else {
             web.loadUrl(url)
         }
@@ -289,10 +331,10 @@ class WebDisplay(
     /** Redraws the start page wherever it is showing, after a theme change or new icons. */
     fun refreshHome() {
         mainHandler.post {
-            views.forEach { if (HomePage.isHome(it.url)) loadInto(it, HomePage.URL) }
+            views.forEachIndexed { i, web -> if (showsHome(i)) loadInto(web, homeUrl) }
             renderTabBar()
             // A favourite added on the phone gets its icon on the next refresh.
-            appContext?.let { fetchIcons(it) }
+            if (tabPalette != null) appContext?.let { fetchIcons(it) }
         }
     }
 
@@ -301,6 +343,15 @@ class WebDisplay(
             if (FaviconCache.fetchMissing(context, BrowserHome.hosts(context))) refreshHome()
         }
     }
+
+    /** The page this display generates itself (start page or menu) lives under [homeUrl]. */
+    private fun isHomeUrl(url: String?): Boolean = homePage != null && url != null && url.startsWith(homeUrl)
+
+    /**
+     * Whether tab [index] shows the generated page. Asked of the tab list, not the WebView:
+     * for a page loaded from a string, WebView.getUrl() reports a "data:" URL, not its base URL.
+     */
+    private fun showsHome(index: Int): Boolean = isHomeUrl(tabs.tabs.getOrNull(index)?.url)
 
     fun goForward() {
         mainHandler.post { webView?.let { if (it.canGoForward()) it.goForward() } }
@@ -311,6 +362,7 @@ class WebDisplay(
         val bar = tabBar ?: return
         val context = appContext ?: return
         val palette = tabPalette?.invoke(context) ?: return
+        renderControls(palette)
         val c = bar.context
         bar.removeAllViews()
         bar.setBackgroundColor(palette.ground)
@@ -361,6 +413,100 @@ class WebDisplay(
         }, LinearLayout.LayoutParams(dp(c, 44), dp(c, 44)))
     }
 
+    /** The vertical pill of back, forward and home, or just its handle when folded away. */
+    /**
+     * Shows the folded handle for as long as Android Auto shows its ≡ button after a touch
+     * (about ten seconds, measured on the host), so the two appear and fade together. The open
+     * pill stays until it is folded.
+     */
+    private fun wakeControls() {
+        val pill = controls ?: return
+        mainHandler.removeCallbacks(fadeControls)
+        pill.animate().cancel()
+        pill.visibility = View.VISIBLE
+        pill.alpha = 1f
+        if (MirrorSettings.controlsCollapsed) mainHandler.postDelayed(fadeControls, CONTROLS_VISIBLE_MS)
+    }
+
+    private val fadeControls = Runnable {
+        val pill = controls ?: return@Runnable
+        if (!MirrorSettings.controlsCollapsed) return@Runnable
+        pill.animate().alpha(0f).setDuration(300).withEndAction {
+            // Invisible, not just transparent, so the next tap reaches the page underneath.
+            if (MirrorSettings.controlsCollapsed) pill.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun renderControls(palette: Palette) {
+        val pill = controls ?: return
+        val c = pill.context
+        pill.removeAllViews()
+        pill.elevation = dp(c, 6).toFloat()
+        val collapsed = MirrorSettings.controlsCollapsed
+        // Both shapes hang centred under Android Auto's ≡ (about 76 dp wide, its bottom edge
+        // about 76 dp down on the car display): the open pill just under it, the folded tab touching it.
+        val width = if (collapsed) HANDLE_WIDTH_DP else PILL_WIDTH_DP
+        pill.layoutParams = (pill.layoutParams as FrameLayout.LayoutParams).apply {
+            marginEnd = dp(c, PILL_MARGIN_END_DP + (PILL_WIDTH_DP - width) / 2)
+            topMargin = dp(c, if (collapsed) 74 else 82)
+        }
+        if (collapsed) {
+            // Folded: a small tab, like a pull handle attached to the ≡ button.
+            pill.background = pill(palette.surface, dp(c, HANDLE_HEIGHT_DP / 2))
+            pill.setPadding(0, 0, 0, 0)
+            pill.addView(ImageView(c).apply {
+                // Pointing down: the controls open downwards from here.
+                setImageResource(R.drawable.ic_collapse)
+                imageTintList = ColorStateList.valueOf(palette.text)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                setPadding(0, dp(c, 2), 0, dp(c, 2))
+                contentDescription = "Mostrar controles"
+                setOnClickListener { toggleControls(palette) }
+                layoutParams = LinearLayout.LayoutParams(dp(c, HANDLE_WIDTH_DP), dp(c, HANDLE_HEIGHT_DP))
+            })
+            return
+        }
+        pill.background = pill(palette.surface, dp(c, PILL_WIDTH_DP / 2))
+        pill.setPadding(dp(c, 6), dp(c, 6), dp(c, 6), dp(c, 6))
+        pill.addView(controlButton(c, palette, R.drawable.ic_back, "Voltar") { goBack() })
+        pill.addView(controlButton(c, palette, R.drawable.ic_forward, "Avançar") { goForward() })
+        pill.addView(controlButton(c, palette, R.drawable.ic_home, "Início") { goHome() })
+        pill.addView(ImageView(c).apply {
+            // Pointing up: the controls fold back up into the tab.
+            setImageResource(R.drawable.ic_expand)
+            imageTintList = ColorStateList.valueOf(palette.muted)
+            scaleType = ImageView.ScaleType.CENTER
+            contentDescription = "Esconder controles"
+            setOnClickListener { toggleControls(palette) }
+            layoutParams = LinearLayout.LayoutParams(dp(c, 64), dp(c, 40))
+        })
+    }
+
+    private fun toggleControls(palette: Palette) {
+        MirrorSettings.controlsCollapsed = !MirrorSettings.controlsCollapsed
+        renderControls(palette)
+        wakeControls()
+        // The start page widens into the space the pill gives back, or makes room for it.
+        val open = !MirrorSettings.controlsCollapsed
+        views.forEachIndexed { i, web ->
+            if (showsHome(i)) web.evaluateJavascript("document.body.classList.toggle('controls-open', $open)", null)
+        }
+    }
+
+    private fun controlButton(c: Context, palette: Palette, iconRes: Int, description: String, onClick: () -> Unit): View =
+        ImageView(c).apply {
+            setImageResource(iconRes)
+            imageTintList = ColorStateList.valueOf(palette.text)
+            background = pill(palette.raised, dp(c, 32))
+            scaleType = ImageView.ScaleType.CENTER
+            contentDescription = description
+            setOnClickListener { onClick() }
+            layoutParams = LinearLayout.LayoutParams(dp(c, 64), dp(c, 64)).apply {
+                topMargin = dp(c, 4)
+                bottomMargin = dp(c, 4)
+            }
+        }
+
     private fun pill(color: Int, radius: Int) = GradientDrawable().apply {
         setColor(color)
         cornerRadius = radius.toFloat()
@@ -375,7 +521,7 @@ class WebDisplay(
         @JavascriptInterface
         fun search() {
             mainHandler.post {
-                if (HomePage.isHome(webView?.url)) onSearchRequest?.invoke()
+                if (showsHome(tabs.active)) onSearchRequest?.invoke()
             }
         }
 
@@ -383,7 +529,7 @@ class WebDisplay(
         fun removeRecent(url: String) {
             mainHandler.post {
                 val context = appContext ?: return@post
-                if (!HomePage.isHome(webView?.url)) return@post
+                if (!showsHome(tabs.active)) return@post
                 HistoryStore.remove(context, url)
                 refreshHome()
             }
@@ -393,7 +539,7 @@ class WebDisplay(
         fun removeSent() {
             mainHandler.post {
                 val context = appContext ?: return@post
-                if (!HomePage.isHome(webView?.url)) return@post
+                if (!showsHome(tabs.active)) return@post
                 HistoryStore.clearSent(context)
                 refreshHome()
             }
@@ -436,6 +582,8 @@ class WebDisplay(
             val downTime = SystemClock.uptimeMillis()
             dispatch(target, MotionEvent.ACTION_DOWN, GesturePoint(x, y), downTime)
             dispatch(target, MotionEvent.ACTION_UP, GesturePoint(x, y), downTime)
+            // After the tap is delivered, so a tap that wakes the handle does not also press it.
+            wakeControls()
         }
     }
 
@@ -452,6 +600,7 @@ class WebDisplay(
         }
         mainHandler.post {
             val target = decorView() ?: return@post
+            wakeControls()
             if (!gestureActive) beginGesture(target)
             val step = ScrollGesture.advance(
                 fingerPoint, distanceX, distanceY, target.width, target.height
@@ -567,6 +716,15 @@ class WebDisplay(
                 "Object.defineProperty(e,'which',{get:function(){return k[1];}});" +
                 "t.dispatchEvent(e);});});})();"
         }
+
+        /** The open pill's width, its right margin, and the folded tab's size, in dp. */
+        const val PILL_WIDTH_DP = 76
+        const val PILL_MARGIN_END_DP = 6
+        const val HANDLE_WIDTH_DP = 60
+        const val HANDLE_HEIGHT_DP = 32
+
+        /** How long Android Auto keeps its strip on screen after a touch. */
+        const val CONTROLS_VISIBLE_MS = 10_000L
 
         /** How long after the last scroll event the finger lifts. */
         const val GESTURE_IDLE_MS = 140L

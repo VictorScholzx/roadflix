@@ -5,47 +5,22 @@ import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.CarIcon
-import androidx.car.app.model.GridItem
-import androidx.car.app.model.GridTemplate
-import androidx.car.app.model.ItemList
-import androidx.car.app.model.ListTemplate
-import androidx.car.app.model.Row
 import androidx.car.app.model.Template
-import androidx.core.graphics.drawable.IconCompat
+import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.viami.aamirror.R
 import com.viami.aamirror.browser.BrowserDisplay
-import com.viami.aamirror.core.MenuLayout
-import com.viami.aamirror.core.MirrorSettings
+import com.viami.aamirror.browser.MenuDisplay
 import com.viami.aamirror.setup.SettingsStore
 
-/** Root menu of AA Suite: pick a mode, or open the settings. */
+/**
+ * Root menu of RoadFlix. The menu is drawn by the app on the car surface (see
+ * MenuPage) instead of Android Auto's grid, so it follows the design and theme.
+ * The template is always a NavigationTemplate, so coming back to it never
+ * changes template type, which the host rejects.
+ */
 class HomeScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycleObserver {
-
-    /**
-     * One entry of the menu. Grid cells truncate long titles, so they carry
-     * a short label of their own.
-     */
-    private class Mode(
-        val titleRes: Int,
-        val shortTitleRes: Int,
-        val iconRes: Int,
-        val open: () -> Unit,
-    )
-
-    private val modes = listOf(
-        Mode(R.string.menu_mirror, R.string.menu_mirror_short, R.drawable.ic_mode_mirror) {
-            screenManager.push(MirrorScreen(carContext))
-        },
-        Mode(R.string.menu_browser, R.string.menu_browser_short, R.drawable.ic_globe) {
-            BrowserDisplay.goHome()
-            screenManager.push(BrowserScreen(carContext))
-        },
-        Mode(R.string.menu_youtube, R.string.menu_youtube_short, R.drawable.ic_mode_youtube) {
-            screenManager.push(YouTubeScreen(carContext))
-        },
-    )
 
     init {
         lifecycle.addObserver(this)
@@ -57,54 +32,29 @@ class HomeScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycleO
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        SurfaceRouter.setSink(null)
-        // The settings screen may have changed the layout while we were away.
-        invalidate()
+        MenuDisplay.onAppLink = { target -> open(target) }
+        SurfaceRouter.setSink(WebSink.of(carContext, MenuDisplay))
+        // The theme may have changed on the phone in the meantime.
+        MenuDisplay.refreshHome()
     }
 
-    override fun onGetTemplate(): Template =
-        if (MirrorSettings.menuLayout == MenuLayout.GRID) gridTemplate() else listTemplate()
+    override fun onStop(owner: LifecycleOwner) {
+        MenuDisplay.onAppLink = null
+    }
 
-    private fun gridTemplate(): Template {
-        val items = ItemList.Builder()
-        for (mode in modes) {
-            items.addItem(
-                GridItem.Builder()
-                    .setTitle(carContext.getString(mode.shortTitleRes))
-                    .setImage(icon(mode.iconRes))
-                    .setOnClickListener(mode.open)
-                    .build()
-            )
+    private fun open(target: String) {
+        when (target) {
+            "mirror" -> screenManager.push(MirrorScreen(carContext))
+            "browser" -> {
+                BrowserDisplay.goHome()
+                screenManager.push(BrowserScreen(carContext))
+            }
+            "youtube" -> screenManager.push(YouTubeScreen(carContext))
         }
-        return GridTemplate.Builder()
-            .setSingleList(items.build())
-            .setTitle(carContext.getString(R.string.app_name))
-            .setHeaderAction(Action.APP_ICON)
-            .setActionStrip(settingsStrip())
-            .build()
     }
 
-    private fun listTemplate(): Template {
-        val items = ItemList.Builder()
-        for (mode in modes) {
-            items.addItem(
-                Row.Builder()
-                    .setTitle(carContext.getString(mode.titleRes))
-                    .setImage(icon(mode.iconRes))
-                    .setOnClickListener(mode.open)
-                    .build()
-            )
-        }
-        return ListTemplate.Builder()
-            .setSingleList(items.build())
-            .setTitle(carContext.getString(R.string.app_name))
-            .setHeaderAction(Action.APP_ICON)
-            .setActionStrip(settingsStrip())
-            .build()
-    }
-
-    private fun settingsStrip(): ActionStrip =
-        ActionStrip.Builder()
+    override fun onGetTemplate(): Template {
+        val strip = ActionStrip.Builder()
             .addAction(
                 Action.Builder()
                     .setIcon(icon(R.drawable.ic_settings))
@@ -112,7 +62,9 @@ class HomeScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycleO
                     .build()
             )
             .build()
+        return NavigationTemplate.Builder().setActionStrip(strip).build()
+    }
 
     private fun icon(iconRes: Int): CarIcon =
-        CarIcon.Builder(IconCompat.createWithResource(carContext, iconRes)).build()
+        CarIcons.of(carContext, iconRes)
 }

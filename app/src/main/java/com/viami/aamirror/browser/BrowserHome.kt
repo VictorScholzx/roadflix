@@ -48,7 +48,7 @@ object BrowserHome {
                     icon = FaviconCache.dataUri(context, HomePage.hostOf(it.url)),
                 )
             }
-        return HomePage.render(palette(context), tiles, recents, sent)
+        return HomePage.render(palette(context), tiles, recents, sent, controlsOpen = !MirrorSettings.controlsCollapsed)
     }
 
     /** The colours of the chosen theme as it applies right now (automatic mode follows day/night). */

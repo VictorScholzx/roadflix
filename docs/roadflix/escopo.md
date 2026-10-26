@@ -451,6 +451,14 @@ Prioridades identificadas pela auditoria: abas, histórico, botão avançar, tem
 
 **Fase 7 (personalização): etapas 1 a 5 concluídas em 24/10/2026.** Pendente: testar tudo na central do Geely.
 
+**Ajustes pós-etapa 5 (24–26/10/2026, testados no DHU):**
+- **Menu do carro desenhado pelo app** (`MenuPage`), igual ao design: título e três cards grandes com ícones centralizados, nas cores do tema; a engrenagem fica na barra do Android Auto. Substitui a grade/lista do Android Auto.
+- **Corrigido:** o app fechava ao trocar "Formato do menu" e voltar (o Android Auto recusa uma tela que volta com outro tipo de template). A opção grade/lista foi removida.
+- **Ícones da central enviados como imagem** (`CarIcons`): o Android Auto guarda ícones por número de recurso e mostrava figuras antigas quando os números mudavam.
+- **Controles do navegador desenhados pelo app:** voltar, avançar e início numa pílula vertical logo abaixo do ≡ do Android Auto (que o Android Auto obriga a ter e não deixa mover). Recolhida, vira uma abinha colada no ≡ (seta ⌄ abre, ⌃ fecha), começa sempre recolhida e aparece/some junto com o ≡ (~10 s após um toque). Aberta, a página inicial abre espaço para ela; recolhida, a barra de pesquisa e os cards vão até a borda.
+- **Corrigido:** a página inicial não atualizava em alguns casos, porque o WebView informa páginas geradas como `data:`; agora o app usa o próprio controle de abas.
+- Observação de teste: com a janela do DHU **maximizada**, toques perto da borda direita não chegam ao app (defeito do emulador); no tamanho normal funciona.
+
 ---
 
 ## 11. Critérios de sucesso

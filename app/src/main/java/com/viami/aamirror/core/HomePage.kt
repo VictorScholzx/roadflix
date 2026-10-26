@@ -43,6 +43,7 @@ object HomePage {
         tiles: List<HomeTile>,
         recents: List<RecentLink> = emptyList(),
         sent: SentLink? = null,
+        controlsOpen: Boolean = false,
     ): String {
         val p = palette
         val sentBlock = sent?.let {
@@ -87,8 +88,9 @@ object HomePage {
             html,body{height:100%;background:${hex(p.ground)};color:${hex(p.text)};
               font-family:'Inter',system-ui,-apple-system,Roboto,sans-serif;
               -webkit-font-smoothing:antialiased;overflow-x:hidden}
-            body{padding:3.5vh 104px 3vh 3vw;display:flex;flex-direction:column;gap:3vh}
-            header{display:flex;align-items:center;gap:3vw}
+            body{padding:3.5vh 3vw 3vh 3vw;display:flex;flex-direction:column;gap:3vh}
+            header{display:flex;align-items:center;gap:3vw;margin-top:30px}
+            body.controls-open header,body.controls-open .cols{margin-right:96px}
             .clock{font-size:min(9vh,40px);font-weight:600;letter-spacing:-.02em;line-height:1;
               font-variant-numeric:tabular-nums}
             .date{font-size:min(3.4vh,16px);color:${hex(p.muted)};margin-top:.6vh}
@@ -136,7 +138,7 @@ object HomePage {
             .mini img{width:70%;height:70%;object-fit:contain}
             .mini.letter{background:${hex(p.ground)};color:${hex(p.text)};font-size:min(2.8vh,12px);font-weight:500}
             </style></head>
-            <body>
+            <body${if (controlsOpen) " class=\"controls-open\"" else ""}>
             <header>
               <div><div class="clock" id="clock">--:--</div><div class="date" id="date"></div></div>
               <button class="search" onclick="$BRIDGE.search()">

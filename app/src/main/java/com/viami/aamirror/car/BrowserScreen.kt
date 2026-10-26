@@ -4,10 +4,8 @@ import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
-import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
-import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.viami.aamirror.R
@@ -16,8 +14,8 @@ import com.viami.aamirror.core.UrlResolver
 
 /**
  * The browser on the car display. Search lives on the start page itself (its
- * pill opens the car keyboard), which leaves the four strip slots for
- * menu, back, forward and home.
+ * pill opens the car keyboard) and back/forward/home on the browser's own
+ * foldable pill, so the Android Auto strip only holds the menu button.
  */
 class BrowserScreen(carContext: CarContext) : Screen(carContext), DefaultLifecycleObserver {
 
@@ -37,11 +35,10 @@ class BrowserScreen(carContext: CarContext) : Screen(carContext), DefaultLifecyc
     }
 
     override fun onGetTemplate(): Template {
+        // Back, forward and home are drawn by the browser itself as a foldable pill; Android Auto
+        // requires a strip on this template, so it keeps just the way back to the RoadFlix menu.
         val strip = ActionStrip.Builder()
             .addAction(action(R.drawable.ic_menu) { screenManager.pop() })
-            .addAction(action(R.drawable.ic_back) { BrowserDisplay.goBack() })
-            .addAction(action(R.drawable.ic_forward) { BrowserDisplay.goForward() })
-            .addAction(action(R.drawable.ic_home) { BrowserDisplay.goHome() })
             .build()
         return NavigationTemplate.Builder().setActionStrip(strip).withPan().build()
     }
@@ -56,11 +53,7 @@ class BrowserScreen(carContext: CarContext) : Screen(carContext), DefaultLifecyc
 
     private fun action(iconRes: Int, onClick: () -> Unit): Action =
         Action.Builder()
-            .setIcon(
-                CarIcon.Builder(
-                    IconCompat.createWithResource(carContext, iconRes)
-                ).build()
-            )
+            .setIcon(CarIcons.of(carContext, iconRes))
             .setOnClickListener(onClick)
             .build()
 }

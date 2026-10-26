@@ -6,10 +6,6 @@ object MirrorSettings {
     @Volatile
     var fillScreen: Boolean = false
 
-    /** How the car home screen lists the modes. */
-    @Volatile
-    var menuLayout: MenuLayout = MenuLayout.GRID
-
     /** The theme picked on the phone. */
     @Volatile
     var theme: AppTheme = AppTheme.DEFAULT
@@ -17,4 +13,8 @@ object MirrorSettings {
     /** true = light by day, [theme] by night. */
     @Volatile
     var autoTheme: Boolean = false
+
+    /** true = the browser's back/forward/home pill is folded down to its handle; it opens folded. */
+    @Volatile
+    var controlsCollapsed: Boolean = true
 }

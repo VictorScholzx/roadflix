@@ -11,17 +11,7 @@
     <string name="start_request_text">Toque para autorizar o compartilhamento da tela</string>
 
     <!-- Menu na central do carro -->
-    <string name="menu_mirror">Espelhar tela</string>
-    <!-- As células da grade cortam títulos longos: versões curtas -->
-    <string name="menu_mirror_short">Espelhar</string>
-    <string name="menu_browser_short">Navegador</string>
-    <string name="menu_youtube_short">YouTube</string>
-    <string name="menu_browser">Navegador</string>
-    <string name="menu_youtube">YouTube TV</string>
     <string name="settings_title">Configurações</string>
-    <string name="settings_layout">Formato do menu</string>
-    <string name="layout_row_grid">Grade · toque para mudar para lista</string>
-    <string name="layout_row_list">Lista · toque para mudar para grade</string>
     <string name="menu_rotation">Trava na horizontal</string>
     <string name="rotation_row_on">Ligada · toque para desligar</string>
     <string name="rotation_row_off">Desligada · toque para manter o celular na horizontal</string>

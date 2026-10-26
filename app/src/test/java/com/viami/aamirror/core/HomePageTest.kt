@@ -119,6 +119,12 @@ class HomePageTest {
     }
 
     @Test
+    fun `the cards leave room for the control pill only while it is open`() {
+        assertTrue(HomePage.render(palette, emptyList(), controlsOpen = true).contains("<body class=\"controls-open\">"))
+        assertTrue(HomePage.render(palette, emptyList(), controlsOpen = false).contains("<body>"))
+    }
+
+    @Test
     fun `home is recognised by its base url`() {
         assertTrue(HomePage.isHome(HomePage.URL))
         assertFalse(HomePage.isHome("https://www.google.com"))
