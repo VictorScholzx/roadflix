@@ -46,7 +46,7 @@ Estratégia acordada (inalterada):
 |---|---|---|
 | Xiaomi Redmi Note 8 | Android 10; MIUI 12.0.4; build `QKQ1.200114.002` | **Primeiro candidato. Não atualizar** — ver 7.1: o Android 10 é provavelmente uma *vantagem* para o método de instalação |
 | Xiaomi Redmi Note 11 | Versão do Android não confirmada | Alternativa |
-| POCO X5 Pro | Android 15 (informado pelo usuário em 23/10/2026); versão HyperOS e build ainda não anotadas | **Candidato forte para seleção de app individual e aparelho dedicado**; pior candidato para o caminho B — ver 7.2 |
+| POCO C65 | ✅ Android 15, build `AP3A.240905.015.A2`; HyperOS 2.0.207.0.VGPMIXM (global) — confirmado pelo usuário em 26/10/2026 | Candidato para seleção de app individual (Android 14+); hardware de entrada; pior candidato para o caminho B — ver 7.2 |
 | iPhone | Disponível | Fora do escopo |
 
 **Redmi Note 8, lido via `adb` em 23/10/2026 (somente leitura):**
@@ -268,15 +268,15 @@ Isso coincide com o README do AA Suite: apps de template não aparecem em carros
 - 🔍 MIUI é agressivo com apps em segundo plano: configurar "sem restrições de bateria" e "início automático".
 - **Continua: não atualizar.**
 
-### 7.2 POCO X5 Pro (Android 15)
+### 7.2 POCO C65 (Android 15, HyperOS 2)
 
 - ✅ Atende ao mínimo e ao recomendado do AA Suite, e ao DHU.
 - 🔍 Por ser Android 14+, o sistema oferece a opção de compartilhar **um app só** na tela de consentimento de captura. ❓ Falta confirmar se a HyperOS da Xiaomi mantém essa opção.
-- 🔍 Hardware bem mais forte que o do Redmi Note 8 (Snapdragon 778G, tela de 120 Hz). Bom candidato a aparelho dedicado, mas aquecimento e bateria precisam ser medidos no carro.
+- 🔍 Hardware de entrada (MediaTek Helio G85, tela HD+ de 90 Hz, bateria de 5000 mAh), de desempenho parecido com o do Redmi Note 8. A bateria maior ajuda como aparelho dedicado; desempenho do navegador e do espelhamento, aquecimento e bateria precisam ser medidos no carro.
 - 🔍 **Caminho B (instalador declarado via adb) tende a ser menos confiável aqui**: AAAD e BluMirror relatam problemas no Android 14+. Os caminhos A e C (Play Store) não são afetados.
 - 🔍 Android 13+ tem as "configurações restritas": apps instalados fora da loja podem ser impedidos de ativar o serviço de acessibilidade até o usuário liberar em *Informações do app → ⋮ → Permitir configurações restritas*. Isso afeta o toque do AA Suite. Pode não se aplicar a instalações via `adb`; precisa ser testado.
 - **Não atualizar** (mesma regra dos outros aparelhos).
-- Pendente: anotar a versão da HyperOS, o build e a versão do app Android Auto.
+- ✅ Android 15 (`AP3A.240905.015.A2`), HyperOS 2.0.207.0.VGPMIXM. Pendente: versão do app Android Auto.
 
 ### 7.3 Redmi Note 11
 
@@ -286,7 +286,7 @@ Isso coincide com o README do AA Suite: apps de template não aparecem em carros
 ### 7.4 Estratégia de teste com dois aparelhos
 
 - **Redmi Note 8 (Android 10):** melhor aposta para o caminho gratuito B.
-- **POCO X5 Pro (Android 15):** melhor aposta para desempenho e seleção de app individual, desde que o app chegue pela Play Store (caminhos A ou C).
+- **POCO C65 (Android 15):** melhor aposta para seleção de app individual, desde que o app chegue pela Play Store (caminhos A ou C) ou o caminho B funcione nele.
 - Testar o mesmo build nos dois, no DHU primeiro, separa o que é limitação do app do que é limitação do aparelho.
 
 ### 7.5 Critérios para o aparelho dedicado (inalterados)
@@ -316,7 +316,7 @@ Versão do Android, desempenho, estabilidade, aquecimento, carregamento contínu
 ### 8.3 Seleção de apps individuais
 
 - ✅ O Android 14+ permite que o usuário escolha compartilhar só um app na tela de consentimento do MediaProjection (é o que o BluMirror usa).
-- 🔍 Implementável no AA Suite como desenvolvimento futuro, **somente em aparelhos Android 14+**. No Redmi Note 8 (Android 10) não é possível; no **POCO X5 Pro (Android 15)** é possível em tese (❓ confirmar se a HyperOS mantém a opção).
+- 🔍 Implementável no AA Suite como desenvolvimento futuro, **somente em aparelhos Android 14+**. No Redmi Note 8 (Android 10) não é possível; no **POCO C65 (Android 15)** é possível em tese (❓ confirmar se a HyperOS mantém a opção).
 
 ---
 
@@ -488,7 +488,7 @@ Prioridades identificadas pela auditoria: abas, histórico, botão avançar, tem
 2. **Fase 2:** autoriza instalar ferramentas no PC? Android Studio completo (mais fácil, ≈6–8 GB) ou só o SDK de linha de comando (≈2–4 GB)?
 3. **DHU:** autoriza atualizar o **app** Android Auto (não o Android) no Redmi Note 8, se for necessário para o DHU?
 4. **AAAD como teste rápido do caminho B:** considerar ou descartar?
-5. Informações que ainda faltam: versão do app Android Auto no Redmi Note 8 e no POCO X5 Pro; versão da HyperOS/build do POCO X5 Pro; versão do Android do Redmi Note 11; se a central já funcionou sem fio; resolução da tela da central (se souber).
+5. Informações que ainda faltam: versão do app Android Auto no POCO C65; versão do Android do Redmi Note 11; se a central já funcionou sem fio; resolução da tela da central (se souber).
 
 ## Ideias (fora do escopo, para avaliar depois)
 
@@ -529,7 +529,9 @@ Registros de ideias do usuário que **não** fazem parte do escopo atual. Só en
 
 - **23/10/2026:** usuário escolheu os caminhos gratuitos A e B e autorizou a Fase 2. SDK de linha de comando instalado, licenças aceitas a pedido do usuário, versão original compilada com sucesso (commit `e449095`).
 
-- **23/10/2026:** o POCO é um **POCO X5 Pro com Android 15** (antes se supunha um POCO C51). Adicionado como segundo aparelho de teste: forte para desempenho e app individual, fraco para o caminho B.
+- **26/10/2026:** POCO C65 confirmado com Android 15 (`AP3A.240905.015.A2`) e HyperOS 2.0.207.0.VGPMIXM.
+- **26/10/2026:** correção do usuário: o POCO é um **POCO C65** (não um X5 Pro). Ficha e estratégia de teste ajustadas: hardware de entrada (Helio G85), desempenho parecido com o do Redmi Note 8; o Android 15 informado antes precisa ser confirmado.
+- **23/10/2026:** o POCO foi anotado como **POCO X5 Pro com Android 15** (antes se supunha um POCO C51). Adicionado como segundo aparelho de teste: forte para desempenho e app individual, fraco para o caminho B.
 
 - **v1.2 → v1.3 (22/10/2026):** Fase 1 concluída. Nome do projeto: android-auto-ex2. Confirmado que apps de template da Car App Library (caso do AA Suite) só aparecem em carro real se instalados pela Play Store; "fontes desconhecidas" não se aplica. Distribuição limitada gratuita descartada como solução para o Android Auto. Levantados caminhos gratuitos A e B e o pago C. PC verificado: Windows 11, JDK 21 utilizável, sem Android SDK.
 - Escopo funcional, uso, visual, conectividade, aparelho dedicado e orçamento: inalterados.
